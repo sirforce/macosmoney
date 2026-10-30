@@ -11,6 +11,8 @@ struct PayeesView: View {
     enum Mode { case payees, depositSources }
     var mode: Mode = .payees
     private var deposits: Bool { mode == .depositSources }
+    /// Settings are remembered separately for Payees and Deposit Sources.
+    private var memoryKey: String { deposits ? "depositSources" : "payees" }
 
     @Query(sort: \Payee.name) private var payees: [Payee]
     @Query(sort: \ReportPreset.name) private var allPresets: [ReportPreset]
@@ -227,6 +229,17 @@ struct PayeesView: View {
             .frame(minWidth: 520, maxWidth: .infinity, maxHeight: .infinity)
         }
         .navigationTitle(deposits ? "Deposit Sources" : "Payees")
+        .onAppear {
+            let d = UserDefaults.standard
+            if let p = d.string(forKey: "\(memoryKey).period").flatMap(ReportPeriod.init(rawValue:)) { period = p }
+            showHidden = d.bool(forKey: "\(memoryKey).showHidden")
+            if let f = d.object(forKey: "\(memoryKey).customFrom") as? Date { customFrom = f }
+            if let t = d.object(forKey: "\(memoryKey).customTo") as? Date { customTo = t }
+        }
+        .onChange(of: period) { UserDefaults.standard.set(period.rawValue, forKey: "\(memoryKey).period") }
+        .onChange(of: showHidden) { UserDefaults.standard.set(showHidden, forKey: "\(memoryKey).showHidden") }
+        .onChange(of: customFrom) { UserDefaults.standard.set(customFrom, forKey: "\(memoryKey).customFrom") }
+        .onChange(of: customTo) { UserDefaults.standard.set(customTo, forKey: "\(memoryKey).customTo") }
         .onChange(of: selection) { old, new in
             if navigating { navigating = false; return }
             guard old != new else { return }

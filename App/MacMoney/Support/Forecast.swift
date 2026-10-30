@@ -8,8 +8,11 @@ import SwiftData
 ///  - bill & deposit occurrences that are not yet in the register (from each bill's next due date).
 /// A bill's next due date always lies past the occurrences already entered, so nothing is counted twice.
 /// Overdue bills (due before today, not yet entered) are projected on today.
+///
+/// A what-if scenario's adjustments add one-time and recurring amounts, and change or stop bills
+/// from a date; anything the scenario adds or changes is marked `.scenario`.
 struct Forecast {
-    enum Source { case actual, register, bill, overdueBill }
+    enum Source { case actual, register, bill, overdueBill, scenario }
 
     struct Event: Identifiable {
         let id = UUID()
@@ -44,7 +47,8 @@ struct Forecast {
     var endBalanceCents: Int { points.last?.balanceCents ?? startBalanceCents }
     var lowPoint: Point? { points.min { $0.balanceCents < $1.balanceCents } }
 
-    init(accounts: [Account], bills: [Bill], today: Date = Day.today, horizon: Date, historyFrom: Date? = nil) {
+    init(accounts: [Account], bills: [Bill], today: Date = Day.today, horizon: Date, historyFrom: Date? = nil,
+         adjustments: [ScenarioAdjustment] = []) {
         let ids = Set(accounts.map(\.persistentModelID))
         startDate = today
         startBalanceCents = accounts.reduce(0) { $0 + $1.balance(asOf: today) }
@@ -56,21 +60,38 @@ struct Forecast {
                                     account: a.name, source: .register, entryID: e.persistentModelID, accountID: a.persistentModelID))
             }
         }
+        let stops = Dictionary(adjustments.filter { $0.kind == .stopBill }.compactMap { a in a.billUUID.map { ($0, a.startDate) } },
+                               uniquingKeysWith: min)
+        let changes = Dictionary(grouping: adjustments.filter { $0.kind == .changeBill && $0.billUUID != nil }, by: { $0.billUUID! })
+            .mapValues { $0.sorted { $0.startDate < $1.startDate } }
         for b in bills where b.isActive {
             let fromAccount = b.account.map { ids.contains($0.persistentModelID) } ?? false
             let toAccount = b.transferAccount.map { ids.contains($0.persistentModelID) } ?? false
             guard fromAccount || toAccount else { continue }
             for d in b.occurrences(through: horizon) {
+                if let stop = stops[b.uuid], d >= stop { break }
                 let overdue = d < today
                 let date = overdue ? today : d
+                // The latest change that has started by this occurrence wins.
+                let change = changes[b.uuid]?.last { $0.startDate <= d }
+                let amount = change?.amountCents ?? b.amountCents
+                let source: Source = change != nil ? .scenario : (overdue ? .overdueBill : .bill)
                 if fromAccount {
-                    events.append(Event(date: date, amountCents: b.amountCents, payee: b.displayName,
-                                        account: b.account?.name ?? "", source: overdue ? .overdueBill : .bill))
+                    events.append(Event(date: date, amountCents: amount, payee: b.displayName,
+                                        account: b.account?.name ?? "", source: source))
                 }
                 if toAccount {
-                    events.append(Event(date: date, amountCents: -b.amountCents, payee: b.displayName,
-                                        account: b.transferAccount?.name ?? "", source: overdue ? .overdueBill : .bill))
+                    events.append(Event(date: date, amountCents: -amount, payee: b.displayName,
+                                        account: b.transferAccount?.name ?? "", source: source))
                 }
+            }
+        }
+        let byUUID = Dictionary(accounts.map { ($0.uuid, $0) }, uniquingKeysWith: { a, _ in a })
+        for a in adjustments where a.kind == .oneTime || a.kind == .recurring {
+            guard let id = a.accountUUID, let account = byUUID[id], a.amountCents != 0 else { continue }
+            for d in a.occurrences(through: horizon) where d >= today {
+                events.append(Event(date: d, amountCents: a.amountCents, payee: a.name.isEmpty ? "What-if" : a.name,
+                                    account: account.name, source: .scenario, accountID: account.persistentModelID))
             }
         }
         events.sort { ($0.date, $0.amountCents < 0 ? 0 : 1) < ($1.date, $1.amountCents < 0 ? 0 : 1) }

@@ -44,10 +44,12 @@ struct RegisterView: View {
     @State private var filter: RegisterFilter = .unreconciled
     @State private var search = ""
     @State private var selection: PersistentIdentifier?
-    @State private var showForm = true
+    @AppStorage("register.showForm") private var showForm = true
     @State private var pendingDelete: PersistentIdentifier?
     @State private var flagEditing: Entry?
     @State private var balancing = false
+    /// Set while jumping to an entry, so the temporary "All transactions" isn't remembered.
+    @State private var jumping = false
     @Query(sort: \Business.name) private var businesses: [Business]
 
     var body: some View {
@@ -103,8 +105,13 @@ struct RegisterView: View {
             Text(deleteMessage(id))
         }
         .onAppear {
-            if account.isReadOnly { filter = .all }
+            // Each account remembers its own view; closed accounts default to everything.
+            let saved = UserDefaults.standard.string(forKey: filterKey).flatMap(RegisterFilter.init(rawValue:))
+            filter = saved ?? (account.isReadOnly ? .all : .unreconciled)
             applyFocus()
+        }
+        .onChange(of: filter) {
+            if jumping { jumping = false } else { UserDefaults.standard.set(filter.rawValue, forKey: filterKey) }
         }
         .onChange(of: focusEntry) { applyFocus() }
         .onReceive(NotificationCenter.default.publisher(for: .editFlag)) { note in
@@ -116,6 +123,8 @@ struct RegisterView: View {
             if !account.isReadOnly { balancing = true }
         }
     }
+
+    private var filterKey: String { "register.filter.\(account.uuid.uuidString)" }
 
     private var selectedEntry: Entry? {
         selection.flatMap { context.model(for: $0) as? Entry }
@@ -131,7 +140,7 @@ struct RegisterView: View {
 
     private func applyFocus() {
         guard let id = focusEntry, index.rowsByAccount[account.persistentModelID]?.contains(where: { $0.id == id }) == true else { return }
-        filter = .all
+        if filter != .all { jumping = true; filter = .all }
         search = ""
         selection = id
         focusEntry = nil

@@ -25,6 +25,23 @@ struct FastTable<Row: Identifiable>: NSViewRepresentable where Row.ID: Hashable 
 
     func makeCoordinator() -> Coordinator { Coordinator(self) }
 
+    private var sortKey: String? { autosave.map { "FastTable.\($0).sort" } }
+
+    private var savedSort: (column: String, ascending: Bool)? {
+        guard let key = sortKey, let d = UserDefaults.standard.dictionary(forKey: key),
+              let column = d["column"] as? String, let ascending = d["ascending"] as? Bool else { return nil }
+        return (column, ascending)
+    }
+
+    fileprivate func saveSort(_ descriptor: NSSortDescriptor?) {
+        guard let key = sortKey else { return }
+        if let descriptor, let column = descriptor.key {
+            UserDefaults.standard.set(["column": column, "ascending": descriptor.ascending], forKey: key)
+        } else {
+            UserDefaults.standard.removeObject(forKey: key)
+        }
+    }
+
     func makeNSView(context: Context) -> NSScrollView {
         let c = context.coordinator
         let table = FastTableView()
@@ -50,7 +67,12 @@ struct FastTable<Row: Identifiable>: NSViewRepresentable where Row.ID: Hashable 
             if col.sort != nil { tc.sortDescriptorPrototype = NSSortDescriptor(key: col.id, ascending: col.firstSortAscending) }
             table.addTableColumn(tc)
         }
-        if let d = defaultSort { table.sortDescriptors = [NSSortDescriptor(key: d.column, ascending: d.ascending)] }
+        // The sort the user last chose wins over the table's default.
+        if let saved = savedSort, columns.contains(where: { $0.id == saved.column && $0.sort != nil }) {
+            table.sortDescriptors = [NSSortDescriptor(key: saved.column, ascending: saved.ascending)]
+        } else if let d = defaultSort {
+            table.sortDescriptors = [NSSortDescriptor(key: d.column, ascending: d.ascending)]
+        }
         if let autosave {
             table.autosaveName = "FastTable.\(autosave)"
             table.autosaveTableColumns = true
@@ -163,6 +185,7 @@ struct FastTable<Row: Identifiable>: NSViewRepresentable where Row.ID: Hashable 
         }
 
         func tableView(_ tableView: NSTableView, sortDescriptorsDidChange oldDescriptors: [NSSortDescriptor]) {
+            parent.saveSort(tableView.sortDescriptors.first)
             let keep = selectedIDs
             resort()
             syncing = true

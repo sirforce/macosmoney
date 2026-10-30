@@ -25,6 +25,7 @@ MacMoney is a SwiftUI + SwiftData app for macOS 26, plus a small Java command-li
 | `App/project.yml` | XcodeGen spec. A pre-build script builds the converter jar when it's missing or stale. No sandbox, because the app runs `java`. |
 | `App/MacMoney/MacMoneyApp.swift` | App entry: model container, a restore pending from the last session, menu commands, Settings, and the backup on quit |
 | `Models/Models.swift` | `Account`, `Category`, `Payee`, `Entry`, `Bill`, `ImportRecord`, `ReportPreset` |
+| `Models/ScenarioModels.swift` | `Scenario`, `ScenarioItem` (what-if changes) and the plain `ScenarioAdjustment` the forecast uses |
 | `Models/BusinessModels.swift` | `Business`, `Vehicle`, `MileageEntry`, `TaxLine`, `VehicleExpense`, mileage rates |
 | `Import/` | `MoneyExportFile` (Decodable JSON, plus running the converter) and `MoneyImporter` (upsert and removal) |
 | `Support/LedgerIndex.swift` | Flat, sorted value rows for every entry, plus per-account totals and payee usage |
@@ -81,13 +82,14 @@ Building and showing 7,500 rows takes about 5 ms.
 
 ## Forecast
 
-`Forecast(accounts:bills:today:horizon:historyFrom:)`:
+`Forecast(accounts:bills:today:horizon:historyFrom:adjustments:)`:
 
 1. **Starting balance:** each account's balance as of today.
 2. **Entered ahead:** register entries dated after today, up to the horizon.
 3. **Bills:** each active bill's occurrences from its **next due date** (`Bill.occurrences(through:)`). Occurrences already entered have advanced the next due date, so nothing is counted twice. Overdue occurrences are moved to today. Transfer bills affect both accounts.
 4. **Running balance:** events sorted by date, money out before money in on the same day, giving step-curve points.
-5. **History:** actual entries from `historyFrom` to today, with running balances, for the grey line and custom ranges.
+5. **What-if adjustments** (optional): stop and change bill occurrences from a date (latest change wins), and add one-time and recurring amounts for the chosen accounts. Those events are marked `.scenario`. The view computes the forecast twice, with and without the scenario, to draw the baseline and the difference.
+6. **History:** actual entries from `historyFrom` to today, with running balances, for the grey line and custom ranges.
 
 `BalanceCurve` merges history and forecast for the chart, with a binary-search balance lookup and nearest-day snapping for hover.
 
@@ -121,6 +123,7 @@ Building and showing 7,500 rows takes about 5 ms.
 | `BackupTests` | Round trip, restore with safety copy, pruning, rejecting non-backup files, data file check |
 | `BackupCryptoTests` | Encrypt/decrypt round trip, wrong password, tampering, truncation and header edits rejected, encrypted backup and restore, encrypting existing backups, no plaintext left behind |
 | `ReconcileTests` | Starting balance, difference, finish reconciles only cleared entries and clears flags, adjustments, charges entered once, postpone |
+| `ScenarioTests` | One-time and recurring amounts, changing and stopping bills, accounts outside the forecast, cascade delete |
 | `PresetAndCurveTests` | Preset round trip, forecast curve snapping and balances |
 | `LedgerIndexTests`, `CentsTests` | Index matches the model and incremental updates are fast; money parsing; date round trips |
 

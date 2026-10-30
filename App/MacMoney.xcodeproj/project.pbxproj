@@ -13,7 +13,9 @@
 		105D3D5AD4E16570791C4DF8 /* ScheduleCTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA237117861ADF21D3989FB4 /* ScheduleCTests.swift */; };
 		11AEA7E03552EA06AE208C2F /* TagTransactionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335098EA8D132FE68B248C00 /* TagTransactionsView.swift */; };
 		1A3C530B0037AAB197F0E973 /* Backup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62A07F448FE22C74E3F186CE /* Backup.swift */; };
+		1B3E2FA2CFE67A2032C864F4 /* ScenarioViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADC746E6565AA4B769963B4A /* ScenarioViews.swift */; };
 		207C551BDEE4F7234661A732 /* FastTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F870F375FAE728377D51146 /* FastTable.swift */; };
+		2252F50BE0BCE86533A3C3C5 /* ScenarioTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DB5D230865CD86652914AB6 /* ScenarioTests.swift */; };
 		269A3DDF1A7973E3071511DC /* FindView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D991AB965B37449B8564460F /* FindView.swift */; };
 		2E70D99846EC912CAB8BDE5A /* lib in Resources */ = {isa = PBXBuildFile; fileRef = F81897E87E4D6FF68725634E /* lib */; };
 		39A26867233E37BF48835BAF /* BackupViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FFA8C54D7D203126D4F2B75 /* BackupViews.swift */; };
@@ -27,6 +29,7 @@
 		62499F05B640B7BF5FD5D8D2 /* DataCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = F40ECDE037A460EBC41AEF9B /* DataCheck.swift */; };
 		6CAD31E86837A2B204C56CFB /* BillsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C09C50DA62FECD8CC625CFD /* BillsView.swift */; };
 		7193C6B34C401258D8441FF9 /* ForecastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6193991917F2598BFFC78ADA /* ForecastView.swift */; };
+		775ADE140B8F422072065F63 /* ScenarioModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CA0C99DEA3E5CDB267788F7 /* ScenarioModels.swift */; };
 		78A3E84D6B6DD3F8AB653476 /* EntryFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE8A710224C16BEF698D294D /* EntryFormView.swift */; };
 		817AD3B514FC725D078DECC4 /* MacMoneyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE09B62E2FB106FDE52EEE82 /* MacMoneyApp.swift */; };
 		8E1A0E76930FAD74A28E3F9A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3B18827E5C7F0F4C12AEA539 /* Assets.xcassets */; };
@@ -62,6 +65,7 @@
 
 /* Begin PBXFileReference section */
 		0430C220C45DD3218C855E54 /* MoneyImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoneyImporter.swift; sourceTree = "<group>"; };
+		0DB5D230865CD86652914AB6 /* ScenarioTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScenarioTests.swift; sourceTree = "<group>"; };
 		108D3C88D81CDF3ABD9E4F26 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		166FC0D830172B603A185BCC /* PayeesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PayeesView.swift; sourceTree = "<group>"; };
 		2A5C859EBE3554FBB4CCBF3C /* EntryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryStore.swift; sourceTree = "<group>"; };
@@ -78,6 +82,7 @@
 		62A07F448FE22C74E3F186CE /* Backup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Backup.swift; sourceTree = "<group>"; };
 		67833773835F582A2AD6BE37 /* AccountEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountEditor.swift; sourceTree = "<group>"; };
 		6A2DBA951F998D806DE385BC /* mny-export.jar */ = {isa = PBXFileReference; lastKnownFileType = archive.jar; path = "mny-export.jar"; sourceTree = "<group>"; };
+		6CA0C99DEA3E5CDB267788F7 /* ScenarioModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScenarioModels.swift; sourceTree = "<group>"; };
 		6E9AF510678F3B294C7D52FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		7C09C50DA62FECD8CC625CFD /* BillsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillsView.swift; sourceTree = "<group>"; };
 		84DCC552786B1DE850BB0B67 /* BillTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillTests.swift; sourceTree = "<group>"; };
@@ -91,6 +96,7 @@
 		99885047A8A897C6A5782C47 /* ScheduleC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleC.swift; sourceTree = "<group>"; };
 		9F870F375FAE728377D51146 /* FastTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastTable.swift; sourceTree = "<group>"; };
 		ACF5538E8E001253319DFE52 /* BusinessModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BusinessModels.swift; sourceTree = "<group>"; };
+		ADC746E6565AA4B769963B4A /* ScenarioViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScenarioViews.swift; sourceTree = "<group>"; };
 		AE09B62E2FB106FDE52EEE82 /* MacMoneyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacMoneyApp.swift; sourceTree = "<group>"; };
 		AECFCAEFD52A40FE5AFFE5BD /* BalanceAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceAccountView.swift; sourceTree = "<group>"; };
 		B8C42B3A92A294A8800C8256 /* MacMoneyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MacMoneyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -126,6 +132,7 @@
 				4A35A7BB8FE31DB9A1DA8571 /* ImportTests.swift */,
 				96420E312929675B01E642DF /* PresetAndCurveTests.swift */,
 				EC8C2AB370A42CF87F721D16 /* ReconcileTests.swift */,
+				0DB5D230865CD86652914AB6 /* ScenarioTests.swift */,
 				CA237117861ADF21D3989FB4 /* ScheduleCTests.swift */,
 			);
 			path = MacMoneyTests;
@@ -164,6 +171,7 @@
 				BA88E0AC8FFFD60CC8DE7D56 /* ImportView.swift */,
 				166FC0D830172B603A185BCC /* PayeesView.swift */,
 				8645046D4C506752C5ACFC93 /* RegisterView.swift */,
+				ADC746E6565AA4B769963B4A /* ScenarioViews.swift */,
 				244719F31CFDC206E31643E6 /* Business */,
 			);
 			path = Views;
@@ -201,6 +209,7 @@
 			children = (
 				ACF5538E8E001253319DFE52 /* BusinessModels.swift */,
 				8FA731FE10C24AE87B277CE7 /* Models.swift */,
+				6CA0C99DEA3E5CDB267788F7 /* ScenarioModels.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -393,6 +402,8 @@
 				50F0B8171A48F158F8B618E3 /* Reconcile.swift in Sources */,
 				EC8E88DD847105CF5149FD22 /* RegisterView.swift in Sources */,
 				01B790F57B09516273F20616 /* ReportPeriod.swift in Sources */,
+				775ADE140B8F422072065F63 /* ScenarioModels.swift in Sources */,
+				1B3E2FA2CFE67A2032C864F4 /* ScenarioViews.swift in Sources */,
 				41B6976D839804B7A8EDF1C0 /* ScheduleC.swift in Sources */,
 				11AEA7E03552EA06AE208C2F /* TagTransactionsView.swift in Sources */,
 			);
@@ -408,6 +419,7 @@
 				60B635BFF5D8C7429D3B7524 /* ImportTests.swift in Sources */,
 				9B76DD89599E226E218537B2 /* PresetAndCurveTests.swift in Sources */,
 				9284C553972547C175FC4060 /* ReconcileTests.swift in Sources */,
+				2252F50BE0BCE86533A3C3C5 /* ScenarioTests.swift in Sources */,
 				105D3D5AD4E16570791C4DF8 /* ScheduleCTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

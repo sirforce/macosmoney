@@ -27,6 +27,15 @@ The **sidebar** on the left has:
 
 The toolbar has **New Account** (+) and **Import from Money**.
 
+**MacMoney remembers your layout** between runs:
+
+- the window size and position, and the sidebar width;
+- the account or page you had open;
+- every table's column widths, order and sort column (each table separately);
+- each register's view (Unreconciled, All transactions…) and whether the transaction form is showing;
+- the Forecast's account, period, custom dates and what-if scenario;
+- the period and *show hidden* setting on Payees and on Deposit Sources (each separately).
+
 ## Accounts
 
 - **New account:** toolbar **+**. Choose a name, type (bank, credit card, investment, loan), opening balance (enter what you owe on a card or loan as a negative number), date opened, account number, notes and, optionally, the **business** it belongs to.
@@ -182,7 +191,30 @@ Bills you've already entered ahead of time aren't counted twice. Overdue bills y
 - **Chart:** grey for actual history, orange for the forecast, a dashed line for today and a red line at zero.
   - **Hover** to snap to the nearest day with activity. A callout shows the day's ending balance, the net change and the transactions behind it.
   - **Click** to highlight that day's transactions in the table below and scroll to them. Selecting a row in the table marks its day on the chart.
-- **Table:** every event with its source (*actual*, *entered*, *bill*, *overdue*), amount and running balance. **Double-click** an actual or entered transaction to open it in its register.
+- **Table:** every event with its source (*actual*, *entered*, *bill*, *overdue*, *what-if*), amount and running balance. **Double-click** an actual or entered transaction to open it in its register.
+
+### What-if scenarios
+
+A scenario is a named set of changes laid over the forecast, so you can see what a decision would do before you make it. Scenarios are projections only: they never change your registers or bills.
+
+**Scenarios…** (in the Forecast toolbar) opens the editor. Add a scenario with **+**, name it, and use **Add Change** for any of:
+
+| Change | Example | You enter |
+|---|---|---|
+| **One-time amount** | New laptop, tax refund, bonus | Description, money in or out, amount, account, date |
+| **New recurring amount** | Car payment, a raise, a new client | Description, money in or out, amount, account, start, how often, optional last date |
+| **Change a bill or deposit** | Rent goes up in June | The bill, its new amount, the date it starts |
+| **Stop a bill or deposit** | Cancel a subscription, lose a client | The bill, the date it stops |
+
+Double-click a change to edit it; right-click to delete. Right-click a scenario to **Duplicate** it, which is handy for trying variations ("Move in June" vs. "Move in August").
+
+Choose a scenario in the **What-if** menu to see it:
+
+- The chart draws the scenario in **purple** over the normal forecast as a **dashed orange baseline**.
+- The ending balance and lowest point show the difference from the baseline (for example "−$4,800.00 vs baseline").
+- Transactions the scenario adds or changes are marked *what-if* in the table and hover callouts.
+
+Amounts in accounts outside the forecast's account choice are left out, and dates before today are ignored. The chosen scenario is remembered; choose **None** to go back to the plain forecast.
 
 ## Business / Schedule C
 

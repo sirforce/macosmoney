@@ -12,6 +12,40 @@ enum SidebarItem: Hashable {
     case allBusinesses
 }
 
+/// The last sidebar choice, saved by uuid so it survives relaunches and re-imports.
+enum SidebarMemory {
+    static let key = "sidebar.selection"
+
+    static func encode(_ item: SidebarItem?, accounts: [Account], businesses: [Business]) -> String? {
+        switch item {
+        case .account(let id): accounts.first { $0.persistentModelID == id }.map { "account:\($0.uuid)" }
+        case .business(let id): businesses.first { $0.persistentModelID == id }.map { "business:\($0.uuid)" }
+        case .payees: "payees"
+        case .depositSources: "depositSources"
+        case .bills: "bills"
+        case .forecast: "forecast"
+        case .find: "find"
+        case .allBusinesses: "allBusinesses"
+        case nil: nil
+        }
+    }
+
+    static func decode(_ s: String, accounts: [Account], businesses: [Business]) -> SidebarItem? {
+        let parts = s.split(separator: ":", maxSplits: 1).map(String.init)
+        switch parts[0] {
+        case "account": return accounts.first { $0.uuid.uuidString == parts.last }.map { .account($0.persistentModelID) }
+        case "business": return businesses.first { $0.uuid.uuidString == parts.last }.map { .business($0.persistentModelID) }
+        case "payees": return .payees
+        case "depositSources": return .depositSources
+        case "bills": return .bills
+        case "forecast": return .forecast
+        case "find": return .find
+        case "allBusinesses": return .allBusinesses
+        default: return nil
+        }
+    }
+}
+
 struct ContentView: View {
     @Environment(\.modelContext) private var context
     @Query(sort: \Account.name) private var accounts: [Account]
@@ -124,7 +158,15 @@ struct ContentView: View {
             }
         }
         .onAppear {
+            if selection == nil, let saved = UserDefaults.standard.string(forKey: SidebarMemory.key) {
+                selection = SidebarMemory.decode(saved, accounts: accounts, businesses: businesses)
+            }
             if selection == nil, let first = openAccounts.first { selection = .account(first.persistentModelID) }
+        }
+        .onChange(of: selection) {
+            if let s = SidebarMemory.encode(selection, accounts: accounts, businesses: businesses) {
+                UserDefaults.standard.set(s, forKey: SidebarMemory.key)
+            }
         }
     }
 

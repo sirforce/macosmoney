@@ -18,7 +18,7 @@ Money was discontinued years ago and only runs on Windows. MacMoney lets you mov
 | **Find** | Search every transaction in every account, with a "memo only" option and period filter. Double-click a result to jump to it in its register. |
 | **Payees & Deposit Sources** | Every payee, or only the people and companies who pay you, with use counts, this year's and all-time totals. Select one or many for a trend chart, totals by year and category, every transaction, and CSV export. Back and forward buttons move between what you've looked at. **Saved presets** recall a selection and its filters with one click. |
 | **Bills & Deposits** | Recurring items (weekly, twice a month, monthly, yearly and more) that keep their day of the month. Sort, edit the next due date and frequency, enter or skip occurrences, or pre-load everything due into the right register. Optionally flag entries as "auto-pay scheduled". |
-| **Forecast** | Today's balance, plus entries you've already entered ahead of time, plus bills and deposits not yet entered, without double counting. Choose 3–36 months or a custom date range. Hover the chart to see what moves the balance each day; click to highlight those transactions; double-click to open one. |
+| **Forecast** | Today's balance, plus entries you've already entered ahead of time, plus bills and deposits not yet entered, without double counting. Choose 3–36 months or a custom date range. **What-if scenarios** (one-time or recurring amounts, changed or stopped bills) are drawn over the baseline with the difference shown. Hover the chart to see what moves the balance each day; click to highlight those transactions; double-click to open one. |
 | **Business / Schedule C** | One or more businesses. Link whole accounts, or tag individual transactions in a personal account where business and personal are mixed. Map categories to Schedule C lines. Supports business-use %, 50% meals and vehicles (standard mileage or actual expenses with a trip log). Produces a Schedule C and a profit & loss report per business or for all of them, with CSV for your accountant. |
 | **Backup & restore** | Verified point-in-time backups: manual, automatic when the app quits (each time, daily, weekly or monthly), keep the last *N*, optionally **AES-256 encrypted** and optionally in iCloud Drive. A safety backup is taken before every import and every restore. **Check Data File** looks for database damage and bookkeeping inconsistencies. |
 
@@ -112,7 +112,6 @@ If Money itself stores a wrong reconciled balance for an account, list it so the
 
 Planned, roughly in order:
 
-- **What-if forecast scenarios**: named, saved scenarios laid over the baseline
 - **Saved reports** with PDF export (spending by category, income vs. expense, net worth)
 - **Attachments**: receipts and statements (images, PDFs) on any transaction
 - **CSV / OFX import** for credit card and bank downloads

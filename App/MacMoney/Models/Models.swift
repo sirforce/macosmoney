@@ -307,6 +307,7 @@ enum Schema1 {
     static let models: [any PersistentModel.Type] = [
         Account.self, Category.self, Payee.self, Entry.self, Bill.self, ImportRecord.self,
         Business.self, Vehicle.self, MileageEntry.self, ReportPreset.self,
+        Scenario.self, ScenarioItem.self,
     ]
 }
 

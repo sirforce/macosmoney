@@ -8,15 +8,20 @@ struct ForecastView: View {
 
     @Query(sort: \Account.name) private var accounts: [Account]
     @Query private var bills: [Bill]
+    @Query(sort: \Scenario.name) private var scenarios: [Scenario]
 
-    @State private var accountChoice: String = "all"
+    @AppStorage("forecast.account") private var accountChoice: String = "all"
     /// Months ahead, or 0 for a custom start/end range.
-    @State private var months = 12
-    @State private var customStart = Day.adding(.month, -1, to: Day.today)
-    @State private var customEnd = Day.adding(.month, 6, to: Day.today)
+    @AppStorage("forecast.months") private var months = 12
+    @AppStorage("forecast.customStart") private var customStart = Day.adding(.month, -1, to: Day.today)
+    @AppStorage("forecast.customEnd") private var customEnd = Day.adding(.month, 6, to: Day.today)
     @State private var selection = Set<UUID>()
     @State private var pickedDate: Date?
     @State private var forecast: Forecast?
+    /// The forecast without the scenario, for comparison (nil when no scenario is shown).
+    @State private var baseline: Forecast?
+    @AppStorage("forecast.scenario") private var scenarioChoice = ""
+    @State private var showScenarios = false
     @Environment(LedgerIndex.self) private var index
 
     private static let horizons = [3, 6, 12, 18, 24, 36]
@@ -30,6 +35,8 @@ struct ForecastView: View {
 
     private var custom: Bool { months == 0 }
 
+    private var scenario: Scenario? { scenarios.first { $0.uuid.uuidString == scenarioChoice } }
+
     /// The visible date range: presets show 3 months of actual history, then the forecast.
     private var window: ClosedRange<Date> {
         let today = Day.today
@@ -42,14 +49,23 @@ struct ForecastView: View {
             if let forecast { content(forecast) } else { ProgressView() }
         }
         .navigationTitle("Forecast")
-        .navigationSubtitle("Register entries ahead of today + bills & deposits not yet entered")
-        // Recompute only when data is saved or the account/period changes — not on every redraw.
-        .task(id: "\(index.version)|\(accountChoice)|\(months)|\(customStart.timeIntervalSince1970)|\(customEnd.timeIntervalSince1970)") {
+        .navigationSubtitle(scenario.map { "What-if: \($0.name)" } ?? "Register entries ahead of today + bills & deposits not yet entered")
+        // Recompute only when data is saved or the account/period/scenario changes — not on every redraw.
+        .task(id: "\(index.version)|\(accountChoice)|\(months)|\(customStart.timeIntervalSince1970)|\(customEnd.timeIntervalSince1970)|\(scenario?.signature ?? "")") {
             let today = Day.today
             let w = window
-            forecast = Forecast(accounts: selectedAccounts, bills: bills, today: today,
+            let base = Forecast(accounts: selectedAccounts, bills: bills, today: today,
                                 horizon: max(w.upperBound, today), historyFrom: w.lowerBound)
+            if let scenario {
+                forecast = Forecast(accounts: selectedAccounts, bills: bills, today: today, horizon: max(w.upperBound, today),
+                                    historyFrom: w.lowerBound, adjustments: scenario.sortedItems.map(\.adjustment))
+                baseline = base
+            } else {
+                forecast = base
+                baseline = nil
+            }
         }
+        .sheet(isPresented: $showScenarios) { ScenariosView(chosen: $scenarioChoice) }
     }
 
     /// Rows for the table: the forecast, plus actual history when a custom range starts in the past.
@@ -63,6 +79,7 @@ struct ForecastView: View {
         let w = window
         let rows = tableRows(forecast)
         let curve = BalanceCurve(forecast)
+        let base = baseline.map(BalanceCurve.init)
         let low = curve.lowest(in: w)
         return VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 16) {
@@ -85,6 +102,15 @@ struct ForecastView: View {
                         .frame(width: 150)
                 }
                 Spacer()
+                Picker("What-if", selection: $scenarioChoice) {
+                    Text("None").tag("")
+                    if !scenarios.isEmpty { Divider() }
+                    ForEach(scenarios) { Text($0.name.isEmpty ? "Untitled" : $0.name).tag($0.uuid.uuidString) }
+                }
+                .frame(width: 230)
+                .help("Lay a saved what-if scenario over the forecast")
+                Button { showScenarios = true } label: { Label("Scenarios…", systemImage: "wand.and.stars") }
+                    .help("Create and edit what-if scenarios")
             }
             .padding(12)
 
@@ -93,7 +119,8 @@ struct ForecastView: View {
                     stat("On \(Day.string(w.lowerBound))", curve.balance(at: w.lowerBound))
                 }
                 stat("Today", forecast.startBalanceCents)
-                stat(custom ? "On \(Day.string(w.upperBound))" : "In \(months) months", curve.balance(at: w.upperBound))
+                stat(custom ? "On \(Day.string(w.upperBound))" : "In \(months) months", curve.balance(at: w.upperBound),
+                     baseline: base?.balance(at: w.upperBound))
                 if let low {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Lowest point").font(.caption).foregroundStyle(.secondary)
@@ -103,6 +130,7 @@ struct ForecastView: View {
                         }
                         .buttonStyle(.plain)
                         .help("Show what happens that day")
+                        if let b = base?.lowest(in: w) { delta(low.balanceCents - b.balanceCents) }
                     }
                 }
                 let overdue = forecast.events.filter { $0.source == .overdueBill }.count
@@ -114,7 +142,7 @@ struct ForecastView: View {
             }
             .padding(.horizontal, 12)
 
-            ForecastChart(forecast: forecast, curve: curve, domain: w, picked: pickedDate) { date in
+            ForecastChart(forecast: forecast, baseline: baseline, curve: curve, domain: w, picked: pickedDate) { date in
                 pick(date, rows: rows)
             }
             .frame(minHeight: 260)
@@ -156,13 +184,16 @@ struct ForecastView: View {
         FastColumn("Payee", width: 260, min: 120) { $0.payee } style: { e in FastCellStyle(dimmed: e.source == .actual) }
             .sortedText { $0.payee },
         FastColumn("Source", width: 70, min: 50) { e in
-            switch e.source { case .actual: "actual"; case .register: "entered"; case .bill: "bill"; case .overdueBill: "overdue" }
+            switch e.source {
+            case .actual: "actual"; case .register: "entered"; case .bill: "bill"; case .overdueBill: "overdue"; case .scenario: "what-if"
+            }
         } style: { e in
             switch e.source {
             case .actual: FastCellStyle(color: .tertiaryLabelColor, tooltip: "Already happened")
             case .register: FastCellStyle(color: .secondaryLabelColor, tooltip: "Entered in the register ahead of time")
             case .bill: FastCellStyle(color: .systemBlue, tooltip: "Scheduled bill or deposit, not yet entered")
             case .overdueBill: FastCellStyle(color: .systemOrange, tooltip: "Past due and not entered — projected on today")
+            case .scenario: FastCellStyle(color: .systemPurple, tooltip: "Added or changed by the what-if scenario")
             }
         }
         .sortedText { "\($0.source)" },
@@ -178,11 +209,19 @@ struct ForecastView: View {
         .sorted(by: { $0.balanceCents }),
     ]
 
-    private func stat(_ title: String, _ cents: Int) -> some View {
+    private func stat(_ title: String, _ cents: Int, baseline: Int? = nil) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(title).font(.caption).foregroundStyle(.secondary)
             Text(Cents.string(cents)).font(.title3).monospacedDigit().foregroundStyle(cents < 0 ? .red : .primary)
+            if let baseline { delta(cents - baseline) }
         }
+    }
+
+    /// The scenario's difference from the baseline forecast.
+    private func delta(_ cents: Int) -> some View {
+        Text(cents == 0 ? "same as baseline" : "\(cents > 0 ? "+" : "")\(Cents.string(cents)) vs baseline")
+            .font(.caption).monospacedDigit()
+            .foregroundStyle(cents == 0 ? Color.secondary : (cents > 0 ? Color.green : Color.purple))
     }
 
     private func dayBinding(_ b: Binding<Date>) -> Binding<Date> {
@@ -234,6 +273,8 @@ struct BalanceCurve {
 /// Kept as its own view so mouse movement redraws only the chart.
 private struct ForecastChart: View {
     let forecast: Forecast
+    /// The forecast without the what-if scenario, drawn dashed underneath it.
+    let baseline: Forecast?
     let curve: BalanceCurve
     let domain: ClosedRange<Date>
     let picked: Date?
@@ -244,7 +285,15 @@ private struct ForecastChart: View {
         let today = forecast.startDate
         let history = forecast.history.filter { domain.contains($0.date) || $0.date == today }
         let future = forecast.points.filter { $0.date <= domain.upperBound }
+        let basePoints = baseline?.points.filter { $0.date <= domain.upperBound } ?? []
+        let tint: Color = baseline == nil ? .orange : .purple
         Chart {
+            ForEach(basePoints) { p in
+                LineMark(x: .value("Date", p.date), y: .value("Balance", Double(p.balanceCents) / 100), series: .value("Series", "Baseline"))
+                    .interpolationMethod(.stepEnd)
+                    .foregroundStyle(.orange.opacity(0.7))
+                    .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [5, 4]))
+            }
             ForEach(history) { p in
                 LineMark(x: .value("Date", p.date), y: .value("Balance", Double(p.balanceCents) / 100), series: .value("Series", "Actual"))
                     .interpolationMethod(.stepEnd)
@@ -253,10 +302,10 @@ private struct ForecastChart: View {
             ForEach(future) { p in
                 AreaMark(x: .value("Date", p.date), y: .value("Balance", Double(p.balanceCents) / 100), series: .value("Series", "Forecast"))
                     .interpolationMethod(.stepEnd)
-                    .foregroundStyle(.orange.opacity(0.25))
+                    .foregroundStyle(tint.opacity(baseline == nil ? 0.25 : 0.15))
                 LineMark(x: .value("Date", p.date), y: .value("Balance", Double(p.balanceCents) / 100), series: .value("Series", "Forecast"))
                     .interpolationMethod(.stepEnd)
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(tint)
             }
             if domain.contains(today) {
                 RuleMark(x: .value("Today", today))
@@ -279,10 +328,21 @@ private struct ForecastChart: View {
                     }
                 PointMark(x: .value("Hover", hover), y: .value("Balance", Double(curve.balance(at: hover)) / 100))
                     .symbolSize(60)
-                    .foregroundStyle(hover < today ? Color.gray : Color.orange)
+                    .foregroundStyle(hover < today ? Color.gray : tint)
             }
         }
         .chartXScale(domain: domain)
+        .overlay(alignment: .topTrailing) {
+            if baseline != nil {
+                HStack(spacing: 12) {
+                    legend("What-if", .purple, dashed: false)
+                    legend("Baseline", .orange, dashed: true)
+                }
+                .font(.caption).padding(6)
+                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 6))
+                .padding(.trailing, 50)
+            }
+        }
         .chartYAxis {
             AxisMarks { v in
                 AxisGridLine()
@@ -302,6 +362,15 @@ private struct ForecastChart: View {
                         if let d = day(at: p, proxy: proxy, geo: geo) { onPick(d) }
                     }
             }
+        }
+    }
+
+    private func legend(_ title: String, _ color: Color, dashed: Bool) -> some View {
+        HStack(spacing: 4) {
+            Path { p in p.move(to: CGPoint(x: 0, y: 4)); p.addLine(to: CGPoint(x: 18, y: 4)) }
+                .stroke(color, style: StrokeStyle(lineWidth: 2, dash: dashed ? [4, 3] : []))
+                .frame(width: 18, height: 8)
+            Text(title)
         }
     }
 
@@ -335,9 +404,11 @@ private struct HoverCard: View {
                 ForEach(shown) { e in
                     HStack(spacing: 6) {
                         Text(e.payee).lineLimit(1)
-                        if e.source == .bill || e.source == .overdueBill {
-                            Text(e.source == .bill ? "bill" : "overdue").font(.caption2)
-                                .foregroundStyle(e.source == .bill ? Color.blue : Color.orange)
+                        switch e.source {
+                        case .bill: Text("bill").font(.caption2).foregroundStyle(.blue)
+                        case .overdueBill: Text("overdue").font(.caption2).foregroundStyle(.orange)
+                        case .scenario: Text("what-if").font(.caption2).foregroundStyle(.purple)
+                        default: EmptyView()
                         }
                         Spacer(minLength: 8)
                         Text(Cents.string(e.amountCents)).monospacedDigit()
