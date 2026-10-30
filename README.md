@@ -114,12 +114,13 @@ If Money itself stores a wrong reconciled balance for an account, list it so the
 
 Planned, roughly in order:
 
-- **Saved reports** with PDF export (spending by category, income vs. expense, net worth)
-- **Purchases on Schedule C**: a business purchases report for your accountant, with item tags deciding the amount for linked charges
-- **Attachments** on any transaction (receipts already work on purchases)
-- **Link card payments to checking**, then payee rules, a business review queue for Schedule C, and a spending report
-- **iCloud sync** between Macs (the data model is already CloudKit-compatible)
-- Payee rules to tag business transactions automatically
+1. **Purchases on Schedule C**: a business purchases report by Schedule C line (CSV/PDF) for your accountant. For a charge linked to a purchase, the business items decide the amount; unlinked purchases count on their own; a warning appears when something may be counted twice.
+2. **Purchase rules**: vendor and department defaults (for example "this vendor is always business, this line") so new imports arrive already tagged.
+3. **Card and bank follow-ups**: link card payments to the checking payments that paid them, payee cleanup rules, a business review queue for card transactions (B/P keys like Purchases), and a spending report that leaves out linked payments.
+4. **Smaller purchase items**: hide a whole order, notes and receipts in the New Purchase sheet, attachments on any register transaction.
+5. **Other retailers' order files** (lower priority; manual entry and Itemize Purchase cover them for now).
+6. **Saved reports** with PDF export (spending by category, income vs. expense, net worth).
+7. **Editable splits** and **iCloud sync** between Macs (the data model is already CloudKit-compatible).
 
 ## Privacy note for contributors
 
