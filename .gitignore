@@ -28,3 +28,9 @@ tools/mny-export/*.jar
 
 # Local release configuration (team ID etc.)
 tools/release/release.env
+
+# Bank/card downloads for import (personal data)
+import/
+*.ofx
+*.qfx
+*.qbo

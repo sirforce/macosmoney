@@ -45,7 +45,7 @@ struct AccountEditor: View {
                 }
             }
             if account?.moneyId != nil {
-                Text("Imported from Money — name, balance and closed status are refreshed on re-import. The business link is kept.")
+                Text("Imported from Money — name and balance are refreshed on re-import. Closing or reopening it here, and the business link, are kept.")
                     .font(.caption).foregroundStyle(.secondary)
             }
             if let error { Text(error).foregroundStyle(.red) }
@@ -88,6 +88,8 @@ struct AccountEditor: View {
         a.accountNumber = number.nilIfBlank
         a.notes = notes.nilIfBlank
         a.business = business
+        // Money refreshes a Money account's closed status on re-import; remember the user's choice.
+        if a.moneyId != nil, a.isClosed != closed { a.closedOverride = closed }
         a.isClosed = closed
         try? context.save()
         if account == nil { onCreated(a) }

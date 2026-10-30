@@ -27,6 +27,7 @@ MacMoney is a SwiftUI + SwiftData app for macOS 26, plus a small Java command-li
 | `Models/Models.swift` | `Account`, `Category`, `Payee`, `Entry`, `Bill`, `ImportRecord`, `ReportPreset` |
 | `Models/ScenarioModels.swift` | `Scenario`, `ScenarioItem` (what-if changes) and the plain `ScenarioAdjustment` the forecast uses |
 | `Models/BusinessModels.swift` | `Business`, `Vehicle`, `MileageEntry`, `TaxLine`, `VehicleExpense`, mileage rates |
+| `BankImport/` | Bank downloads: `BankFormats` (CSV, XLSX, OFX, Discover HTML readers), `BankImporter` (fingerprints, matching, undo), `PayeeCleaner`, `BankRecord`/`BankImportBatch` models |
 | `Import/` | `MoneyExportFile` (Decodable JSON, plus running the converter) and `MoneyImporter` (upsert and removal) |
 | `Support/LedgerIndex.swift` | Flat, sorted value rows for every entry, plus per-account totals and payee usage |
 | `Support/EntryStore.swift`, `BillStore.swift` | Create, edit and delete entries (keeping transfer peers in sync), and bill recurrence |
@@ -104,6 +105,17 @@ Building and showing 7,500 rows takes about 5 ms.
 
 `importMny(at:)` wraps the whole pipeline: backup first, copy the file to a temp folder, run `java -jar mny-export.jar`, decode, then run.
 
+## Bank imports
+
+`BankImporter` never adds a bank row twice:
+
+1. **Fingerprint:** each row gets one. When the bank gives a reference (Bank of America, Amex, OFX `FITID`), it's the reference + date + amount. Otherwise it's the date + amount + normalized description. Identical rows within a file get `#1`, `#2`…, so two identical same-day charges stay two.
+2. **Skip what's known:** fingerprints already recorded in `BankRecord` for the account are skipped, whatever has happened to the entry since (edited, tagged, deleted).
+3. **Match:** otherwise, an entry already in the account with the same amount within 7 days, and not yet claimed by a bank row, is matched instead of duplicated. This covers payments entered from checking and transactions typed in by hand.
+4. **Add the rest** as cleared entries with a cleaned payee name; the original text goes in `Entry.bankDescription`.
+
+Each import is a `BankImportBatch`, which can be undone. It records added and matched rows, any balance correction or opening-balance change, and whether it reopened a closed account (`Account.closedOverride`, which Money re-imports respect). `Account.importHints` remembers each file's clues (`last4:1234`, `acct:12345`, `folder:chase visa`) so the next download goes to the same account.
+
 ## Backups
 
 - `Backup.make` uses `sqlite3_backup_*` to copy the live store into a new file, switches the copy out of WAL mode so it's a single file, checks it with `PRAGMA integrity_check`, then prunes old copies.
@@ -123,6 +135,7 @@ Building and showing 7,500 rows takes about 5 ms.
 | `BackupTests` | Round trip, restore with safety copy, pruning, rejecting non-backup files, data file check |
 | `BackupCryptoTests` | Encrypt/decrypt round trip, wrong password, tampering, truncation and header edits rejected, encrypted backup and restore, encrypting existing backups, no plaintext left behind |
 | `ReconcileTests` | Starting balance, difference, finish reconciles only cleared entries and clears flags, adjustments, charges entered once, postpone |
+| `BankImportTests` | Every supported format, payee cleanup, re-import adds nothing and keeps edits, deleted rows stay deleted, overlapping files, payment matching, balance correction and undo, reopening a closed account, account suggestions. Optional dry run of a real downloads folder (`TEST_RUNNER_MACMONEY_BANK_FOLDER`) |
 | `ScenarioTests` | One-time and recurring amounts, changing and stopping bills, accounts outside the forecast, cascade delete |
 | `PresetAndCurveTests` | Preset round trip, forecast curve snapping and balances |
 | `LedgerIndexTests`, `CentsTests` | Index matches the model and incremental updates are fast; money parsing; date round trips |

@@ -53,6 +53,12 @@ final class Account {
     /// Last statement balanced in MacMoney (app-owned; Money's own values are the two above).
     var statementDate: Date?
     var statementBalanceCents: Int?
+    /// MacMoney's own open/closed choice for a Money account (e.g. reopened to import bank files);
+    /// nil follows Money.
+    var closedOverride: Bool?
+    /// Clues that identify this account's bank downloads ("bofa:1234", "folder:chase visa"),
+    /// newline-separated, so files go to the right account automatically.
+    var importHints: String = ""
     var accountNumber: String?
     var notes: String?
     var isBusiness: Bool = false
@@ -175,6 +181,8 @@ final class Entry {
     var vehicleExpenseRaw: String?
     /// The bill this entry was entered from (app-side link; survives re-import).
     var billUUID: UUID?
+    /// The bank's own description, for entries imported from a bank download (kept for search).
+    var bankDescription: String?
 
     init(account: Account?, date: Date, amountCents: Int) {
         self.account = account
@@ -307,7 +315,7 @@ enum Schema1 {
     static let models: [any PersistentModel.Type] = [
         Account.self, Category.self, Payee.self, Entry.self, Bill.self, ImportRecord.self,
         Business.self, Vehicle.self, MileageEntry.self, ReportPreset.self,
-        Scenario.self, ScenarioItem.self,
+        Scenario.self, ScenarioItem.self, BankRecord.self, BankImportBatch.self,
     ]
 }
 

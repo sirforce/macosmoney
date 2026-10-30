@@ -230,7 +230,8 @@ struct RegisterView: View {
             FastColumn("Payee", width: 190, min: 100) { r in
                 r.row.isVoid ? "\(r.row.payee)  VOID" : r.row.payee
             } style: { r in
-                FastCellStyle(color: r.row.isVoid ? .systemRed : nil, dimmed: dim(r))
+                FastCellStyle(color: r.row.isVoid ? .systemRed : nil, dimmed: dim(r),
+                              tooltip: r.row.bankDescription.isEmpty ? nil : "Bank: \(r.row.bankDescription)")
             }
             .sortedText { $0.row.payee },
             FastColumn("", id: "business", width: 18, min: 18, max: 30, help: "Business") { _ in "" } style: { r in

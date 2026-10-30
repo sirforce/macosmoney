@@ -13,6 +13,7 @@ Money was discontinued years ago and only runs on Windows. MacMoney lets you mov
 | Area | What you get |
 |---|---|
 | **Import from Money** | Reads `.mny` files from Money 2005 through Sunset Edition (read-only). Brings in accounts, categories, payees, transactions, splits, transfers, flags and recurring bills. Re-import as often as you like: Money's records update in place and anything you added in MacMoney is kept. |
+| **Bank & card downloads** | Import CSV, Excel and OFX/QFX downloads from Bank of America, Chase, American Express, Discover and most other banks. Drop a file or a whole folder. Re-import as often as you like: nothing is added twice, your edits are kept, deleted rows stay deleted, and payments already in the account are matched instead of duplicated. Every import can be undone. |
 | **Registers** | One register per account with running balance, cleared/reconciled status (click to toggle), flags with a note and action date, voids, transfers and split display. **Balance Account** reconciles against a statement and beeps when the difference reaches zero. View filters include Unreconciled, Flagged, Uncleared, date ranges and Upcoming. Search covers memo, payee, number and amount. Fast with 10,000+ rows. |
 | **Accounts** | Bank, credit card, investment and loan accounts. Create, edit, close (read-only) or delete them. Closed Money accounts import as read-only history. |
 | **Find** | Search every transaction in every account, with a "memo only" option and period filter. Double-click a result to jump to it in its register. |
@@ -114,7 +115,7 @@ Planned, roughly in order:
 
 - **Saved reports** with PDF export (spending by category, income vs. expense, net worth)
 - **Attachments**: receipts and statements (images, PDFs) on any transaction
-- **CSV / OFX import** for credit card and bank downloads
+- **Link card payments to checking**, then payee rules, a business review queue for Schedule C, and a spending report
 - **iCloud sync** between Macs (the data model is already CloudKit-compatible)
 - Payee rules to tag business transactions automatically
 

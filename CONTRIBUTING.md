@@ -4,7 +4,7 @@ Thanks for your interest in MacMoney.
 
 ## Ground rules
 
-1. **Never commit real financial data.** That includes `.mny` or `.mbf` files, export JSON, `*.store` data files, `*.macmoneybackup` files, screenshots of real accounts, and real names or amounts in tests. `.gitignore` covers the usual files; check `git status` before committing anyway.
+1. **Never commit real financial data.** That includes `.mny` or `.mbf` files, bank downloads (`import/`, `*.ofx`, `*.qfx`), export JSON, `*.store` data files, `*.macmoneybackup` files, screenshots of real accounts, and real names or amounts in tests. `.gitignore` covers the usual files; check `git status` before committing anyway.
 2. **Never modify a user's `.mny` file.** The converter must open copies, read-only.
 3. **Money is `Int` cents, days are noon-UTC `Date`s.** Use `Cents` and `Day` from `Support/Day.swift`.
 4. **Keep models CloudKit-compatible:** defaults or optionals on every attribute, optional relationships, no unique constraints.

@@ -32,6 +32,10 @@ struct MacMoneyApp: App {
                     NotificationCenter.default.post(name: .showMoneyImport, object: nil)
                 }
                 .keyboardShortcut("i", modifiers: [.command, .shift])
+                Button("Import Bank Files…") {
+                    NotificationCenter.default.post(name: .showBankImport, object: nil)
+                }
+                .keyboardShortcut("u", modifiers: [.command, .shift])
             }
             CommandGroup(after: .textEditing) {
                 Button("Find Transactions…") {
@@ -65,6 +69,7 @@ struct MacMoneyApp: App {
 
 extension Notification.Name {
     static let showMoneyImport = Notification.Name("showMoneyImport")
+    static let showBankImport = Notification.Name("showBankImport")
     static let showFind = Notification.Name("showFind")
     static let showBackups = Notification.Name("showBackups")
     static let showDataCheck = Notification.Name("showDataCheck")

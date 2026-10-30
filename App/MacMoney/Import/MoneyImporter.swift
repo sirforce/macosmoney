@@ -32,7 +32,7 @@ struct MoneyImporter {
             let acct = upsert(&accounts, a.moneyId, &s) { Account(name: a.name ?? "") }
             acct.name = a.name ?? "Account \(a.moneyId)"
             acct.kind = AccountKind(rawValue: a.kind) ?? .other
-            acct.isClosed = a.closed
+            acct.isClosed = acct.closedOverride ?? a.closed
             acct.openingBalanceCents = Cents.parse(a.openingBalance) ?? 0
             acct.openDate = Day.parse(a.openDate)
             acct.lastReconciledDate = Day.parse(a.lastReconciledDate)

@@ -12,6 +12,11 @@ enum SidebarItem: Hashable {
     case allBusinesses
 }
 
+struct BankImportRequest: Identifiable {
+    let id = UUID()
+    let urls: [URL]
+}
+
 /// The last sidebar choice, saved by uuid so it survives relaunches and re-imports.
 enum SidebarMemory {
     static let key = "sidebar.selection"
@@ -51,6 +56,8 @@ struct ContentView: View {
     @Query(sort: \Account.name) private var accounts: [Account]
     @State private var selection: SidebarItem?
     @State private var showImport = false
+    /// Bank import sheet, with any files dropped on the window.
+    @State private var bankImport: BankImportRequest?
     @State private var showBackups = false
     @State private var showDataCheck = false
     @State private var restoreResult: String?
@@ -143,6 +150,15 @@ struct ContentView: View {
                  : "This can't be undone. Closing the account keeps its history instead.")
         }
         .onReceive(NotificationCenter.default.publisher(for: .showMoneyImport)) { _ in showImport = true }
+        .onReceive(NotificationCenter.default.publisher(for: .showBankImport)) { _ in bankImport = BankImportRequest(urls: []) }
+        .sheet(item: $bankImport) { BankImportView(initialURLs: $0.urls) }
+        .dropDestination(for: URL.self) { urls, _ in
+            let bankTypes: Set<String> = ["csv", "xlsx", "xls", "ofx", "qfx", "qbo"]
+            let usable = urls.filter { $0.hasDirectoryPath || bankTypes.contains($0.pathExtension.lowercased()) }
+            guard !usable.isEmpty else { return false }
+            bankImport = BankImportRequest(urls: usable)
+            return true
+        }
         .onReceive(NotificationCenter.default.publisher(for: .showFind)) { _ in selection = .find }
         .onReceive(NotificationCenter.default.publisher(for: .showBackups)) { _ in showBackups = true }
         .onReceive(NotificationCenter.default.publisher(for: .showDataCheck)) { _ in showDataCheck = true }

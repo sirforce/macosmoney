@@ -3,6 +3,7 @@
 - [The window](#the-window)
 - [Accounts](#accounts)
 - [Registers](#registers)
+- [Importing bank and card downloads](#importing-bank-and-card-downloads)
 - [Flags](#flags)
 - [Find Transactions](#find-transactions)
 - [Payees and Deposit Sources](#payees-and-deposit-sources)
@@ -97,6 +98,38 @@ The form at the bottom of the register (toggle it with the toolbar button) handl
 **Postpone** keeps your marks and the statement figures; next time, the dialog offers to **Resume**.
 
 Balancing done in MacMoney survives re-import: a transaction you reconciled stays reconciled even if Money still shows it as cleared.
+
+## Importing bank and card downloads
+
+**File ▸ Import Bank Files…** (⇧⌘U), or drop downloaded files (or a folder of them) onto the window.
+
+**Supported downloads:** CSV, Excel (`.xlsx`) and OFX/QFX/QBO from most banks. These are recognized automatically:
+
+| Bank | Download |
+|---|---|
+| Bank of America | Credit card CSV (one per statement, or current activity); checking/savings CSV |
+| Chase | Credit card and checking CSV |
+| American Express | Card activity CSV or Excel; American Express savings CSV |
+| Discover | Online savings "Excel" download (an HTML table) |
+| Anything else | OFX/QFX, or a CSV with date, description and amount (or debit/credit) columns |
+
+**How it works:**
+
+1. **Choose where each file goes.** MacMoney suggests an account from what it has learned about the file (the last four digits in its name, the account number inside it, or the folder it's in), so after the first time this is automatic. Files from the same folder move together. Pick a closed account to reopen it, or **New account** to create one named after the folder.
+2. **Check the counts.** Each file shows how many rows are **new**, **matched** and **already imported**.
+   - *Matched:* the transaction is already in the account, for example a card payment entered from checking. It's linked instead of added.
+3. **Balance check (optional).** Enter a statement balance and date. MacMoney adds one reconciled **Balance Correction** so the account agrees with the bank from then on. For a brand-new account it sets the opening balance instead. Discover downloads include the balance, so it's filled in for you.
+4. **Import.** A backup is made first. Imported transactions are marked cleared, and payee names are tidied (`AMAZON MKTPL*1A2B3C4D5` becomes **Amazon**). Hover a payee in the register to see the bank's original text. Search finds it too.
+
+**Re-importing is always safe:**
+
+- Import the same file again, a newer file that overlaps an older one, or your whole downloads folder. Only rows MacMoney hasn't seen are added.
+- Two identical charges on the same day stay two.
+- Anything you add to an imported transaction (category, business, Schedule C line, memo, flag) is never overwritten.
+- If you delete an imported transaction, it stays deleted. Importing the file again doesn't bring it back.
+- Bank imports are MacMoney's own data, so re-importing from Money leaves them alone.
+
+**History and undo:** the **History** tab lists every import, with what it added and from which files. **Undo…** removes the transactions an import added, plus its balance correction, and makes a backup first. The files can then be imported again.
 
 ## Flags
 
@@ -247,6 +280,7 @@ See **[Backup & Restore](backup-and-restore.md)**. In short:
 | ⇧⌘F | Find Transactions |
 | ⇧⌘B | Backups |
 | ⇧⌘R | Balance Account |
+| ⇧⌘U | Import Bank Files |
 | ⌘[ / ⌘] | Back / Forward (Payees, Deposit Sources) |
 | ⌘0 | Overview (Payees, Deposit Sources) |
 | ⌘, | Settings |

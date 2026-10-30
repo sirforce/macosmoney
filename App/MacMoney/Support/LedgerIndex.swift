@@ -36,6 +36,8 @@ struct EntryRow: Identifiable {
     let businessPercent: Int
     let vehicle: String
     let isTransfer: Bool
+    /// The bank's own description, for entries imported from a bank download.
+    let bankDescription: String
     /// Lowercased payee/memo/number/category/amount for substring search.
     let haystack: String
     /// Stable tie-break for entries on the same day (Money's entry order, then creation).
@@ -119,7 +121,7 @@ final class LedgerIndex {
                 payeeName[id] = p.name
                 if p.isHidden { hiddenPayees.insert(id) } else { hiddenPayees.remove(id) }
             case "Account": accountsChanged = true
-            case "Bill", "ImportRecord", "MileageEntry", "ReportPreset", "Scenario", "ScenarioItem": continue
+            case "Bill", "ImportRecord", "MileageEntry", "ReportPreset", "Scenario", "ScenarioItem", "BankRecord", "BankImportBatch": continue
             default: return false
             }
         }
@@ -194,7 +196,8 @@ final class LedgerIndex {
             business: business, businessFromAccount: ownBusiness == nil && !business.isEmpty, isPersonal: e.isPersonal,
             taxLine: vehicle != nil ? "9" : (line?.rawValue ?? ""), taxLineExplicit: e.taxLine != nil,
             businessPercent: e.businessPercent, vehicle: vehicle?.name ?? "", isTransfer: e.transferAccount != nil,
-            haystack: "\(payee)\u{1}\(memo)\u{1}\(number)\u{1}\(category)\u{1}\(Cents.plain(e.amountCents))\u{1}\(e.flagNote ?? "")".lowercased(),
+            bankDescription: e.bankDescription ?? "",
+            haystack: "\(payee)\u{1}\(memo)\u{1}\(number)\u{1}\(category)\u{1}\(Cents.plain(e.amountCents))\u{1}\(e.flagNote ?? "")\u{1}\(e.bankDescription ?? "")".lowercased(),
             order: order)
     }
 
