@@ -20,6 +20,8 @@ struct ContentView: View {
     @State private var showBackups = false
     @State private var showDataCheck = false
     @State private var restoreResult: String?
+    @State private var restoreTarget: RestoreTarget?
+    @State private var backupFailure: String?
     @State private var showClosed = false
     @State private var focusEntry: PersistentIdentifier?
     @Query(sort: \Business.name) private var businesses: [Business]
@@ -81,6 +83,11 @@ struct ContentView: View {
         }
         .sheet(isPresented: $showImport) { ImportView() }
         .sheet(isPresented: $showBackups) { BackupsView() }
+        .sheet(item: $restoreTarget) { RestoreSheet(url: $0.url) }
+        .alert("Automatic backup failed", isPresented: Binding(get: { backupFailure != nil }, set: { if !$0 { backupFailure = nil } })) {
+            Button("Open Backups") { showBackups = true }
+            Button("OK", role: .cancel) {}
+        } message: { Text(backupFailure ?? "") }
         .sheet(isPresented: $showDataCheck) { DataCheckView() }
         .sheet(isPresented: $showNewAccount) {
             AccountEditor(account: nil) { selection = .account($0.persistentModelID) }
@@ -112,6 +119,8 @@ struct ContentView: View {
             if let msg = UserDefaults.standard.string(forKey: Backup.Key.lastRestoreResult) {
                 UserDefaults.standard.removeObject(forKey: Backup.Key.lastRestoreResult)
                 restoreResult = msg
+            } else if let failure = UserDefaults.standard.string(forKey: Backup.Key.lastError) {
+                backupFailure = failure
             }
         }
         .onAppear {
@@ -134,6 +143,14 @@ struct ContentView: View {
     }
 
     @ViewBuilder private var detail: some View {
+        if accounts.isEmpty {
+            WelcomeView(onImport: { showImport = true }, onRestore: { restoreTarget = RestoreTarget.choose() })
+        } else {
+            selectedDetail
+        }
+    }
+
+    @ViewBuilder private var selectedDetail: some View {
         switch selection {
         case .account(let id):
             if let account = accounts.first(where: { $0.persistentModelID == id }) {
@@ -217,5 +234,44 @@ extension Account {
     /// Balance as of a given day (inclusive).
     func balance(asOf day: Date) -> Int {
         openingBalanceCents + (entries ?? []).filter { $0.date <= day }.reduce(0) { $0 + $1.balanceEffectCents }
+    }
+}
+
+/// Shown when there's no data yet (first launch, or a new Mac).
+struct WelcomeView: View {
+    let onImport: () -> Void
+    let onRestore: () -> Void
+
+    var body: some View {
+        VStack(spacing: 24) {
+            Image(systemName: "dollarsign.circle.fill").font(.system(size: 64)).foregroundStyle(.green)
+            Text("Welcome to MacMoney").font(.largeTitle.bold())
+            Text("Bring in your data to get started.").foregroundStyle(.secondary)
+            HStack(spacing: 20) {
+                choice("Import from Microsoft Money", icon: "square.and.arrow.down",
+                       detail: "Start from your .mny file. Needs Java.", action: onImport)
+                choice("Restore from Backup", icon: "clock.arrow.circlepath",
+                       detail: "Moving to a new Mac? Choose a .macmoneybackup — from iCloud Drive, a USB drive, anywhere. Encrypted backups ask for their backup password.",
+                       action: onRestore)
+            }
+        }
+        .padding(40)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func choice(_ title: String, icon: String, detail: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(spacing: 10) {
+                Image(systemName: icon).font(.system(size: 30))
+                Text(title).font(.headline)
+                Text(detail).font(.callout).foregroundStyle(.secondary).multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(20)
+            .frame(width: 260, height: 190)
+            .background(.background.secondary, in: RoundedRectangle(cornerRadius: 12))
+            .contentShape(RoundedRectangle(cornerRadius: 12))
+        }
+        .buttonStyle(.plain)
     }
 }

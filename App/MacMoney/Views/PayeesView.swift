@@ -279,7 +279,8 @@ struct PayeesView: View {
             presetChips
             FastTable(rows: visible.map { PayeeRow($0, usage: u[$0.persistentModelID]) }, columns: payeeColumns,
                       selection: $selection, autosave: deposits ? "DepositSources2" : "Payees2",
-                      defaultSort: deposits ? ("Last", false) : ("Payee", true))
+                      defaultSort: deposits ? ("Last", false) : ("Payee", true),
+                      menu: { ids in listMenu(ids) })
             HStack {
                 Text("\(visible.count) \(deposits ? "sources" : "payees")")
                 Spacer()
@@ -367,6 +368,37 @@ struct PayeesView: View {
     }
 
     // MARK: Detail (one or more selected)
+
+    // MARK: Hiding
+
+    private func listMenu(_ ids: Set<PersistentIdentifier>) -> [FastMenuItem] {
+        let chosen = payees.filter { ids.contains($0.persistentModelID) }
+        guard !chosen.isEmpty else { return [] }
+        let label = chosen.count == 1 ? "“\(chosen[0].name)”" : "\(chosen.count) \(deposits ? "Sources" : "Payees")"
+        var items: [FastMenuItem] = []
+        if chosen.contains(where: { !$0.isHidden }) {
+            items.append(.button("Hide \(label)") { setHidden(chosen, true) })
+        }
+        if chosen.contains(where: \.isHidden) {
+            items.append(.button("Unhide \(label)") { setHidden(chosen, false) })
+        }
+        items.append(.separator)
+        items.append(.button(showHidden ? "Don't Show Hidden" : "Show Hidden") { showHidden.toggle() })
+        return items
+    }
+
+    /// Hidden payees drop out of the list and of payee suggestions when entering transactions.
+    /// The choice is kept across re-imports from Money.
+    private func setHidden(_ list: [Payee], _ hidden: Bool) {
+        for p in list {
+            p.isHidden = hidden
+            p.hiddenOverride = hidden
+        }
+        try? context.save()
+        if hidden && !showHidden {
+            move(to: selection.subtracting(list.map(\.persistentModelID)))
+        }
+    }
 
     // MARK: Navigation
 
@@ -577,8 +609,11 @@ struct PayeesView: View {
             FastCellStyle(color: r.count == 0 ? .tertiaryLabelColor : (deposits ? .systemGreen : nil))
         }
         return [
-            FastColumn(deposits ? "Source" : "Payee", id: "Payee", width: 170, min: 100) { $0.name } style: { r in
-                FastCellStyle(color: r.payee.isHidden ? .secondaryLabelColor : nil)
+            FastColumn(deposits ? "Source" : "Payee", id: "Payee", width: 170, min: 100) { r in
+                r.payee.isHidden ? "\(r.name) (hidden)" : r.name
+            } style: { r in
+                FastCellStyle(color: r.payee.isHidden ? .secondaryLabelColor : nil,
+                              tooltip: r.payee.isHidden ? "Hidden — right-click to unhide" : nil)
             }
             .sortedText { $0.name },
             FastColumn(deposits ? "Deposits" : "Uses", id: "Uses", width: 56, min: 36, align: .right, monospaced: true) { r in

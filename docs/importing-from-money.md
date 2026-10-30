@@ -68,6 +68,7 @@ Re-importing is designed for running Money and MacMoney side by side:
   - a category's Schedule C line
   - an account's business link and notes
   - presets, vehicles and mileage logs
+  - payees you hid or unhid in MacMoney
 - **Flags:** a Money flag on a transaction that's already reconciled is not shown, because MacMoney clears flags on reconcile, as Money's register does.
 
 ## Checking the result

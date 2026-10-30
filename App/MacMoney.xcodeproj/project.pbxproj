@@ -34,6 +34,7 @@
 		A64709289BFA3AB4F9068DCC /* BackupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501BA157234B5EA2BE108AC4 /* BackupTests.swift */; };
 		B9E4943091DC6B608C225F10 /* BusinessModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACF5538E8E001253319DFE52 /* BusinessModels.swift */; };
 		C34DA8775BBCB5E5A6C98519 /* MoneyImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0430C220C45DD3218C855E54 /* MoneyImporter.swift */; };
+		D11023CDF3784B9120E0D6F6 /* BackupCryptoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55444FB321CCFA94783F9888 /* BackupCryptoTests.swift */; };
 		E33C51A42C843232B4CAAFD9 /* EntryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A5C859EBE3554FBB4CCBF3C /* EntryStore.swift */; };
 		E35D3D2E918320F68A053163 /* MoneyExportFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = C125501FF3AFFC2E99907350 /* MoneyExportFile.swift */; };
 		E36D69F585B34FDE495C2EB6 /* BusinessSetupViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6CA359EF670E3EC6C60745C /* BusinessSetupViews.swift */; };
@@ -41,6 +42,7 @@
 		EEE686B6F584F544F767D1DA /* BusinessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 303D27809B5A603AF544C1B8 /* BusinessView.swift */; };
 		F2F5582793834DE1E5CE2822 /* LedgerIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 539B75057124365D366BD2C6 /* LedgerIndex.swift */; };
 		F579143FBEB686EB07334FB1 /* ImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA88E0AC8FFFD60CC8DE7D56 /* ImportView.swift */; };
+		F9EC6674A431896EA84F9697 /* BackupCrypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99617E67E0C40481476B6A51 /* BackupCrypto.swift */; };
 		FB72153D190E24C0CE5279EB /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 108D3C88D81CDF3ABD9E4F26 /* ContentView.swift */; };
 /* End PBXBuildFile section */
 
@@ -66,6 +68,7 @@
 		4A35A7BB8FE31DB9A1DA8571 /* ImportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportTests.swift; sourceTree = "<group>"; };
 		501BA157234B5EA2BE108AC4 /* BackupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupTests.swift; sourceTree = "<group>"; };
 		539B75057124365D366BD2C6 /* LedgerIndex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LedgerIndex.swift; sourceTree = "<group>"; };
+		55444FB321CCFA94783F9888 /* BackupCryptoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupCryptoTests.swift; sourceTree = "<group>"; };
 		6193991917F2598BFFC78ADA /* ForecastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastView.swift; sourceTree = "<group>"; };
 		62A07F448FE22C74E3F186CE /* Backup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Backup.swift; sourceTree = "<group>"; };
 		67833773835F582A2AD6BE37 /* AccountEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountEditor.swift; sourceTree = "<group>"; };
@@ -78,6 +81,7 @@
 		8FA731FE10C24AE87B277CE7 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		908346A220DEFF9A0FAF9724 /* BillStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillStore.swift; sourceTree = "<group>"; };
 		96420E312929675B01E642DF /* PresetAndCurveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetAndCurveTests.swift; sourceTree = "<group>"; };
+		99617E67E0C40481476B6A51 /* BackupCrypto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupCrypto.swift; sourceTree = "<group>"; };
 		99885047A8A897C6A5782C47 /* ScheduleC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleC.swift; sourceTree = "<group>"; };
 		9F870F375FAE728377D51146 /* FastTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastTable.swift; sourceTree = "<group>"; };
 		ACF5538E8E001253319DFE52 /* BusinessModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BusinessModels.swift; sourceTree = "<group>"; };
@@ -108,6 +112,7 @@
 		04E4723739525F01DF80A98D /* MacMoneyTests */ = {
 			isa = PBXGroup;
 			children = (
+				55444FB321CCFA94783F9888 /* BackupCryptoTests.swift */,
 				501BA157234B5EA2BE108AC4 /* BackupTests.swift */,
 				84DCC552786B1DE850BB0B67 /* BillTests.swift */,
 				4A35A7BB8FE31DB9A1DA8571 /* ImportTests.swift */,
@@ -167,6 +172,7 @@
 			isa = PBXGroup;
 			children = (
 				62A07F448FE22C74E3F186CE /* Backup.swift */,
+				99617E67E0C40481476B6A51 /* BackupCrypto.swift */,
 				908346A220DEFF9A0FAF9724 /* BillStore.swift */,
 				F40ECDE037A460EBC41AEF9B /* DataCheck.swift */,
 				4734E060AA67E2B126BA6488 /* Day.swift */,
@@ -347,6 +353,7 @@
 			files = (
 				90BA54A8030C1E0DC28DABC6 /* AccountEditor.swift in Sources */,
 				1A3C530B0037AAB197F0E973 /* Backup.swift in Sources */,
+				F9EC6674A431896EA84F9697 /* BackupCrypto.swift in Sources */,
 				39A26867233E37BF48835BAF /* BackupViews.swift in Sources */,
 				4253ADC378576EC7703E8502 /* BillStore.swift in Sources */,
 				6CAD31E86837A2B204C56CFB /* BillsView.swift in Sources */,
@@ -380,6 +387,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D11023CDF3784B9120E0D6F6 /* BackupCryptoTests.swift in Sources */,
 				A64709289BFA3AB4F9068DCC /* BackupTests.swift in Sources */,
 				8FD5118F9D288215087D50D4 /* BillTests.swift in Sources */,
 				60B635BFF5D8C7429D3B7524 /* ImportTests.swift in Sources */,

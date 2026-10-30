@@ -116,6 +116,8 @@ final class Payee {
     var moneyId: Int?
     var name: String = ""
     var isHidden: Bool = false
+    /// Hidden/unhidden in MacMoney; wins over Money's setting on re-import. Nil follows Money.
+    var hiddenOverride: Bool?
     var accountNumber: String?
     var website: String?
     var notes: String?

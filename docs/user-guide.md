@@ -117,6 +117,16 @@ Both pages share a layout: a list on the left and a report on the right.
 - **By year** and **By category** breakdowns;
 - every matching transaction, sortable, with **Export CSV**.
 
+### Hiding payees and sources
+
+Right-click one or more names in the list and choose **Hide** (or **Unhide**). Hidden names:
+
+- disappear from the list (tick **Hidden**, or right-click ▸ **Show Hidden**, to see them; they're marked *(hidden)*);
+- no longer appear as suggestions when you type a payee in a register;
+- keep all their transactions. Hiding never changes balances or reports.
+
+Your choice survives re-importing from Money, even if the payee's hidden setting differs in Money.
+
 ### Getting around
 
 - **Back / Forward** (toolbar chevrons, **⌘[** / **⌘]**) step through the payees, sources and overview you've viewed, like a web browser.
@@ -177,7 +187,8 @@ See **[Schedule C & Businesses](schedule-c.md)** for the full guide. In short:
 See **[Backup & Restore](backup-and-restore.md)**. In short:
 
 - **File ▸ Backups…** (⇧⌘B): back up now, back up to another folder, restore, restore from a file.
-- **MacMoney ▸ Settings ▸ Backup:** automatic backups on quit, how often, how many to keep, and where (iCloud Drive is one click).
+- **MacMoney ▸ Settings ▸ Backup:** automatic backups on quit, how often, how many to keep, where (iCloud Drive is one click), and **encryption** with a backup password of your choosing.
+- **New Mac:** the Welcome screen's **Restore from Backup** brings everything back. Encrypted backups ask for their backup password.
 - **File ▸ Check Data File…:** checks for damage and inconsistencies.
 
 ## Keyboard shortcuts

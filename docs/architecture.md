@@ -104,6 +104,8 @@ Building and showing 7,500 rows takes about 5 ms.
 - `Backup.make` uses `sqlite3_backup_*` to copy the live store into a new file, switches the copy out of WAL mode so it's a single file, checks it with `PRAGMA integrity_check`, then prunes old copies.
 - **Restore is staged.** The chosen file is recorded in user defaults and the app relaunches. `applyPendingRestore()` runs in `MacMoneyApp.init` before the `ModelContainer` exists: it backs up the current store, swaps in a fresh copy of the backup, and removes `-wal` and `-shm`.
 
+- **Encryption** (`BackupCrypto`): PBKDF2-HMAC-SHA256 → AES-256-GCM over 1 MB chunks. Each chunk authenticates the header, its index and a final flag; the iteration count is bounded so a hostile header can't stall key derivation. The password is stored in the login keychain (`io.github.macmoney.backup`). An encrypted restore is decrypted into a staging file next to the store before the relaunch, and that file is deleted after the swap.
+
 ## Testing
 
 `App/MacMoneyTests`:
@@ -114,6 +116,7 @@ Building and showing 7,500 rows takes about 5 ms.
 | `BillTests` | Day-of-month anchoring, end dates, entering advances the bill, flags clear on reconcile, the forecast doesn't double count, transfer bills |
 | `ScheduleCTests` | Mixed and business accounts, business %, 50% meals, transfers excluded, standard vs. actual vehicle methods |
 | `BackupTests` | Round trip, restore with safety copy, pruning, rejecting non-backup files, data file check |
+| `BackupCryptoTests` | Encrypt/decrypt round trip, wrong password, tampering, truncation and header edits rejected, encrypted backup and restore, encrypting existing backups, no plaintext left behind |
 | `PresetAndCurveTests` | Preset round trip, forecast curve snapping and balances |
 | `LedgerIndexTests`, `CentsTests` | Index matches the model and incremental updates are fast; money parsing; date round trips |
 

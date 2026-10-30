@@ -8,7 +8,7 @@ struct BackupsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var backups: [Backup.Info] = []
     @State private var selection: Backup.Info.ID?
-    @State private var restoring: URL?
+    @State private var restoring: RestoreTarget?
     @State private var deleting: Backup.Info?
     @State private var message: String?
     @State private var error: String?
@@ -23,9 +23,22 @@ struct BackupsView: View {
             }
             Text("Each backup is a complete, verified copy of your MacMoney data at that moment. Restoring replaces everything with that copy — your current data is saved first as a “Before restore” backup, so a restore can always be undone.")
                 .font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
-            Text("Folder: \(Backup.folder.path)").font(.caption).foregroundStyle(.secondary).textSelection(.enabled)
+            HStack {
+                Text("Folder: \(Backup.folder.path)").font(.caption).foregroundStyle(.secondary).textSelection(.enabled)
+                Spacer()
+                Label(Backup.encryptionEnabled ? "New backups are encrypted" : "New backups are not encrypted",
+                      systemImage: Backup.encryptionEnabled ? "lock.fill" : "lock.open")
+                    .font(.caption).foregroundStyle(Backup.encryptionEnabled ? .green : .secondary)
+            }
+            if let failure = UserDefaults.standard.string(forKey: Backup.Key.lastError) {
+                Label(failure, systemImage: "exclamationmark.triangle.fill").foregroundStyle(.orange).font(.callout)
+            }
 
             Table(backups, selection: $selection) {
+                TableColumn("") { b in
+                    if b.encrypted { Image(systemName: "lock.fill").foregroundStyle(.secondary).help("Encrypted") }
+                }
+                .width(16)
                 TableColumn("Date") { b in
                     Text(b.date.formatted(date: .abbreviated, time: .shortened)).monospacedDigit()
                 }
@@ -42,13 +55,13 @@ struct BackupsView: View {
             }
             .contextMenu(forSelectionType: Backup.Info.ID.self) { ids in
                 if let url = ids.first {
-                    Button("Restore…") { restoring = url }
+                    Button("Restore…") { restoring = RestoreTarget(url: url) }
                     Button("Show in Finder") { NSWorkspace.shared.activateFileViewerSelecting([url]) }
                     Divider()
                     Button("Delete…", role: .destructive) { deleting = backups.first { $0.url == url } }
                 }
             } primaryAction: { ids in
-                restoring = ids.first
+                restoring = ids.first.map(RestoreTarget.init)
             }
             .frame(minHeight: 260)
 
@@ -60,7 +73,7 @@ struct BackupsView: View {
                     .buttonStyle(.borderedProminent)
                 Button("Back Up To…") { chooseDestination() }
                     .help("Save a backup somewhere else, such as an external drive")
-                Button("Restore…") { restoring = selection }.disabled(selection == nil)
+                Button("Restore…") { restoring = selection.map(RestoreTarget.init) }.disabled(selection == nil)
                 Button("Restore From File…") { chooseRestoreFile() }
                 Button("Show in Finder") {
                     try? FileManager.default.createDirectory(at: Backup.folder, withIntermediateDirectories: true)
@@ -74,12 +87,7 @@ struct BackupsView: View {
         .padding(20)
         .frame(width: 720, height: 520)
         .onAppear(perform: reload)
-        .confirmationDialog("Restore this backup?", isPresented: Binding(get: { restoring != nil }, set: { if !$0 { restoring = nil } }),
-                            presenting: restoring) { url in
-            Button("Restore and Relaunch", role: .destructive) { restore(url) }
-        } message: { url in
-            Text("MacMoney will quit, replace all current data with “\(url.lastPathComponent)”, and reopen. Your current data is backed up first.")
-        }
+        .sheet(item: $restoring) { RestoreSheet(url: $0.url) }
         .confirmationDialog("Delete backup?", isPresented: Binding(get: { deleting != nil }, set: { if !$0 { deleting = nil } }),
                             presenting: deleting) { b in
             Button("Move to Trash", role: .destructive) {
@@ -96,15 +104,20 @@ struct BackupsView: View {
     private func backUp(to folder: URL?) {
         error = nil; message = nil; working = true
         try? context.save()
-        do {
-            let url = try Backup.make(.manual, folder: folder ?? Backup.folder)
-            message = "Backed up to \(url.lastPathComponent)"
-            reload()
-            selection = url
-        } catch {
-            self.error = error.localizedDescription
+        let target = folder ?? Backup.folder
+        // Off the main thread: encrypting (key derivation + verify) takes about a second.
+        Task {
+            let result = await Task.detached { Result { try Backup.make(.manual, folder: target) } }.value
+            working = false
+            switch result {
+            case .success(let url):
+                message = "Backed up to \(url.lastPathComponent)"
+                reload()
+                selection = url
+            case .failure(let e):
+                self.error = e.localizedDescription
+            }
         }
-        working = false
     }
 
     private func chooseDestination() {
@@ -121,15 +134,155 @@ struct BackupsView: View {
         panel.allowedContentTypes = [UTType(filenameExtension: Backup.fileExtension) ?? .data]
         panel.directoryURL = Backup.folder
         panel.prompt = "Restore"
-        if panel.runModal() == .OK, let url = panel.url { restoring = url }
+        if panel.runModal() == .OK, let url = panel.url { restoring = RestoreTarget(url: url) }
+    }
+}
+
+struct RestoreTarget: Identifiable {
+    let url: URL
+    var id: URL { url }
+
+    /// Shows an Open panel for a backup file anywhere (e.g. iCloud Drive, a USB drive).
+    static func choose() -> RestoreTarget? {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [UTType(filenameExtension: Backup.fileExtension) ?? .data]
+        panel.directoryURL = Backup.iCloudFolder.flatMap { FileManager.default.fileExists(atPath: $0.path) ? $0 : nil } ?? Backup.folder
+        panel.prompt = "Choose"
+        panel.message = "Choose a MacMoney backup (.macmoneybackup)"
+        return panel.runModal() == .OK ? panel.url.map(RestoreTarget.init) : nil
+    }
+}
+
+/// Confirms a restore and, for an encrypted backup this Mac doesn't have the password for, asks for it.
+struct RestoreSheet: View {
+    @Environment(\.modelContext) private var context
+    @Environment(\.dismiss) private var dismiss
+    let url: URL
+    @State private var password = ""
+    @State private var needsPassword = false
+    @State private var remember = true
+    @State private var error: String?
+    @State private var working = false
+
+    private var encrypted: Bool { BackupCrypto.isEncrypted(url) }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label("Restore Backup", systemImage: encrypted ? "lock.fill" : "clock.arrow.circlepath").font(.title2.bold())
+            Text(url.lastPathComponent).font(.callout.monospaced()).textSelection(.enabled)
+            Text("MacMoney will quit, replace all current data with this backup, and reopen. Your current data is saved first as a “Before restore” backup, so this can be undone.")
+                .font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+            if needsPassword {
+                Divider()
+                Text("This backup is encrypted. Enter the backup password that was set in MacMoney when it was made — not your Mac login password.").font(.callout).fixedSize(horizontal: false, vertical: true)
+                SecureField("Backup password", text: $password).textFieldStyle(.roundedBorder).onSubmit(restore)
+                Toggle("Remember this password on this Mac and encrypt new backups with it", isOn: $remember)
+                    .toggleStyle(.checkbox).font(.callout)
+            }
+            if let error { Label(error, systemImage: "exclamationmark.triangle.fill").foregroundStyle(.red).font(.callout) }
+            HStack {
+                if working { ProgressView().controlSize(.small); Text("Decrypting and checking…").font(.caption).foregroundStyle(.secondary) }
+                Spacer()
+                Button("Cancel") { dismiss() }.keyboardShortcut(.cancelAction)
+                Button("Restore and Relaunch", action: restore)
+                    .keyboardShortcut(.defaultAction)
+                    .buttonStyle(.borderedProminent)
+                    .disabled(working || (needsPassword && password.isEmpty))
+            }
+        }
+        .padding(20)
+        .frame(width: 480)
+        .onAppear {
+            needsPassword = encrypted && BackupKeychain.password() == nil
+            remember = BackupKeychain.password() == nil
+        }
     }
 
-    private func restore(_ url: URL) {
+    private func restore() {
         error = nil
+        working = true
         try? context.save()
+        let typed = password.isEmpty ? nil : password
+        let url = url
+        Task {
+            let result = await Task.detached { Result { try Backup.scheduleRestore(from: url, password: typed) } }.value
+            working = false
+            switch result {
+            case .success:
+                if let typed, remember {
+                    try? BackupKeychain.setPassword(typed)
+                    UserDefaults.standard.set(true, forKey: Backup.Key.encrypt)
+                }
+                Backup.relaunch()
+            case .failure(BackupCrypto.Failure.passwordNeeded):
+                needsPassword = true
+                error = nil
+            case .failure(BackupCrypto.Failure.wrongPassword) where typed == nil:
+                // The keychain password didn't open it: made with another (older) backup password.
+                needsPassword = true
+                error = "This backup was made with a different password. Enter it to continue."
+            case .failure(BackupCrypto.Failure.wrongPassword):
+                needsPassword = true
+                error = "That password didn't work."
+            case .failure(let e):
+                error = e.localizedDescription
+            }
+        }
+    }
+}
+
+/// Set or change the backup password.
+struct BackupPasswordSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    let changing: Bool
+    let save: (String) throws -> Void
+    @State private var password = ""
+    @State private var confirm = ""
+    @State private var error: String?
+
+    private var problem: String? {
+        if password.count < 8 { return "Use at least 8 characters — a passphrase of a few words is best." }
+        if password != confirm { return "The passwords don't match." }
+        return nil
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label(changing ? "Change Backup Password" : "Set Backup Password", systemImage: "lock.fill").font(.title3.bold())
+            Text("This is its own password, separate from your Mac login.").font(.callout).foregroundStyle(.secondary)
+            SecureField("Password", text: $password).textFieldStyle(.roundedBorder)
+            SecureField("Confirm password", text: $confirm).textFieldStyle(.roundedBorder).onSubmit(commit)
+            if let problem, !password.isEmpty { Text(problem).font(.caption).foregroundStyle(.secondary) }
+            GroupBox {
+                VStack(alignment: .leading, spacing: 6) {
+                    Label("If you lose this password, encrypted backups can't be opened — by anyone.", systemImage: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.orange)
+                    Text("Save it in your password manager. You'll need it to restore on a new Mac. On this Mac it's kept in your login keychain, so automatic backups never ask for it.")
+                        .foregroundStyle(.secondary)
+                    if changing {
+                        Text("Backups you already have keep the password they were made with.").foregroundStyle(.secondary)
+                    }
+                }
+                .font(.callout)
+                .fixedSize(horizontal: false, vertical: true)
+            }
+            if let error { Text(error).foregroundStyle(.red).font(.callout) }
+            HStack {
+                Spacer()
+                Button("Cancel") { dismiss() }.keyboardShortcut(.cancelAction)
+                Button("Save Password", action: commit).keyboardShortcut(.defaultAction).buttonStyle(.borderedProminent)
+                    .disabled(problem != nil)
+            }
+        }
+        .padding(20)
+        .frame(width: 460)
+    }
+
+    private func commit() {
+        guard problem == nil else { return }
         do {
-            try Backup.scheduleRestore(from: url)
-            Backup.relaunch()
+            try save(password)
+            dismiss()
         } catch {
             self.error = error.localizedDescription
         }
@@ -142,6 +295,11 @@ struct BackupSettingsView: View {
     @AppStorage(Backup.Key.frequency) private var frequency = Backup.Frequency.everyExit.rawValue
     @AppStorage(Backup.Key.keep) private var keep = 10
     @AppStorage(Backup.Key.folder) private var folderPath = ""
+    @AppStorage(Backup.Key.encrypt) private var encrypt = false
+    @State private var settingPassword = false
+    @State private var hasPassword = BackupKeychain.password() != nil
+    @State private var encryptStatus: String?
+    @State private var encrypting = false
 
     var body: some View {
         Form {
@@ -154,6 +312,22 @@ struct BackupSettingsView: View {
                 Stepper("Keep the \(keep) most recent automatic backups", value: $keep, in: 1...100)
                 Text("Backups taken before imports and restores count toward this limit. Manual backups are never deleted automatically.")
                     .font(.caption).foregroundStyle(.secondary)
+            }
+            Section("Encryption") {
+                Toggle("Encrypt backups with a password", isOn: Binding(get: { encrypt }, set: { on in
+                    if on && !hasPassword { settingPassword = true } else { encrypt = on }
+                }))
+                Text("AES-256 encryption. The password is kept in your login keychain so automatic backups never ask; you'll need to type it only to restore on another Mac. If it's lost, encrypted backups can't be recovered.")
+                    .font(.caption).foregroundStyle(.secondary)
+                HStack {
+                    Button(hasPassword ? "Change Password…" : "Set Password…") { settingPassword = true }
+                    let plain = Backup.list().filter { !$0.encrypted }.count
+                    Button("Encrypt \(plain) Existing Backup\(plain == 1 ? "" : "s")") { encryptExisting() }
+                        .disabled(!encrypt || !hasPassword || plain == 0 || encrypting)
+                        .help("Converts the unencrypted backups in the backup folder")
+                    if encrypting { ProgressView().controlSize(.small) }
+                }
+                if let encryptStatus { Text(encryptStatus).font(.caption).foregroundStyle(.secondary) }
             }
             Section("Location") {
                 Text(Backup.folder.path).font(.callout).textSelection(.enabled).lineLimit(2)
@@ -176,6 +350,27 @@ struct BackupSettingsView: View {
         .formStyle(.grouped)
         .frame(width: 560)
         .padding(.vertical, 8)
+        .sheet(isPresented: $settingPassword) {
+            BackupPasswordSheet(changing: hasPassword) { pw in
+                try BackupKeychain.setPassword(pw)
+                hasPassword = true
+                encrypt = true
+            }
+        }
+    }
+
+    private func encryptExisting() {
+        guard let pw = BackupKeychain.password() else { return }
+        encrypting = true
+        encryptStatus = nil
+        Task {
+            let result = await Task.detached { Result { try Backup.encryptExisting(password: pw) } }.value
+            encrypting = false
+            switch result {
+            case .success(let n): encryptStatus = "Encrypted \(n) backup\(n == 1 ? "" : "s")."
+            case .failure(let e): encryptStatus = "Stopped: \(e.localizedDescription)"
+            }
+        }
     }
 
     private func choose() {

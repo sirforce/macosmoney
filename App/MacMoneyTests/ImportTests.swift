@@ -52,6 +52,12 @@ final class ImportTests: XCTestCase {
         let mine = try EntryStore(context: ctx).save(draft, into: account, editing: nil)
         let category = try XCTUnwrap(try ctx.fetch(FetchDescriptor<MacMoney.Category>()).first { !$0.isRoot })
         category.scheduleCLine = "Line 18 Office expense"
+        // Hide one visible Money payee and unhide one Money had hidden (if any); both must stick.
+        let payees = try ctx.fetch(FetchDescriptor<Payee>()).filter { $0.moneyId != nil }
+        let hiddenHere = try XCTUnwrap(payees.first { !$0.isHidden })
+        hiddenHere.isHidden = true; hiddenHere.hiddenOverride = true
+        let shownHere = payees.first { $0.isHidden && $0 !== hiddenHere }
+        shownHere?.isHidden = false; shownHere?.hiddenOverride = false
         try ctx.save()
 
         let second = try MoneyImporter(context: ctx).run(file)
@@ -60,6 +66,8 @@ final class ImportTests: XCTestCase {
         XCTAssertEqual(try ctx.fetchCount(FetchDescriptor<Entry>()), file.transactions.count + 1)
         XCTAssertNotNil(try ctx.fetch(FetchDescriptor<Entry>()).first { $0.uuid == mine.uuid }, "App-entered entry must survive")
         XCTAssertEqual(category.scheduleCLine, "Line 18 Office expense", "App-owned fields must survive")
+        XCTAssertTrue(hiddenHere.isHidden, "Hiding a payee in MacMoney must survive re-import")
+        if let shownHere { XCTAssertFalse(shownHere.isHidden, "Unhiding must survive re-import") }
     }
 }
 

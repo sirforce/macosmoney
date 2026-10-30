@@ -9,6 +9,30 @@ MacMoney keeps **point-in-time copies** of your data, so you can roll back to an
 - **Every backup is checked** right after it's written, with SQLite's `PRAGMA integrity_check` plus a check that it really is a MacMoney file. A copy that fails is deleted and you're told.
 - The name records when and why it was made: *Manual*, *Automatic*, *Before import* or *Before restore*.
 
+## Encryption
+
+**MacMoney ▸ Settings ▸ Backup ▸ Encryption.** Turn on **Encrypt backups with a password** and choose a password. It must be at least 8 characters; a passphrase of a few words is best.
+
+- **The backup password is its own password.** It is *not* your Mac login password. On this Mac it's kept in your login keychain, so automatic backups never ask for it. macOS may ask once whether MacMoney may use it; choose **Always Allow**.
+- **Write it down in your password manager.** If it's lost, encrypted backups can't be opened by anyone, including us. There's no back door.
+- **Changing the password** affects new backups only. Older backups still need the password that was in effect when they were made.
+- **Encrypt Existing Backups** converts the unencrypted backups already in your backup folder, in place.
+- Encrypted backups show a 🔒 in **File ▸ Backups…**.
+
+How it works:
+
+- AES-256-GCM, with the key derived from your password using PBKDF2-HMAC-SHA256 (600,000 rounds, random salt per file).
+- The data is encrypted in 1 MB chunks. Each chunk authenticates the file header, its own position and whether it's the last one. A changed byte, a reordered chunk, a cut-off file or an edited header is rejected instead of restored.
+- The unencrypted snapshot exists only briefly in a private temp folder. After encrypting, MacMoney decrypts the result again and checks it before deleting the temp copy.
+- Backup files are readable only by your user account (permissions `0600`).
+
+## Moving to a new Mac
+
+1. Install MacMoney on the new Mac and open it. With no data yet, it shows a **Welcome** screen.
+2. Click **Restore from Backup** and choose your `.macmoneybackup`, from iCloud Drive ▸ MacMoney Backups, a USB drive or anywhere else.
+3. If the backup is encrypted, MacMoney asks for its **backup password**: the one set in MacMoney when that backup was made, not the new Mac's login password. Leave **Remember this password on this Mac** ticked to keep backups encrypted there too.
+4. MacMoney decrypts and checks the file, relaunches, and your data is back.
+
 ## Automatic backups
 
 **MacMoney ▸ Settings ▸ Backup:**
@@ -38,8 +62,8 @@ Backups are small, a few MB even with decades of data, so keeping many costs lit
 
 ## Restoring
 
-1. **File ▸ Backups…**, select a backup, then **Restore…**. Or use **Restore From File…** for a backup stored elsewhere.
-2. Confirm. MacMoney checks the file, **quits, swaps the data, and reopens**.
+1. **File ▸ Backups…** (⇧⌘B), select a backup, then **Restore…**, or double-click it. Or use **Restore From File…** for a backup stored elsewhere.
+2. Confirm, entering the backup password if MacMoney asks. MacMoney checks the file, **quits, swaps the data, and reopens**.
 3. When it reopens you'll see a message confirming the restore. Your previous data was saved as a *Before restore* backup.
 
 Why the restart: the data file can't be safely replaced while it's open, so the swap happens at the next launch, before the data file is opened. If the backup turns out to be unreadable, nothing is changed and you're told why.
@@ -71,5 +95,6 @@ Each finding shows up to five examples (date, account, payee, amount).
 ## Under the hood
 
 - Code: [`App/MacMoney/Support/Backup.swift`](../App/MacMoney/Support/Backup.swift) and [`DataCheck.swift`](../App/MacMoney/Support/DataCheck.swift).
+- Encryption: [`BackupCrypto.swift`](../App/MacMoney/Support/BackupCrypto.swift), including the file layout and the keychain storage.
 - Settings are stored in user defaults under `backup.*`.
-- A backup is an ordinary SQLite database. You can inspect it with `sqlite3`, or open it in MacMoney by restoring it.
+- An unencrypted backup is an ordinary SQLite database you can inspect with `sqlite3`. An encrypted one starts with the bytes `MMBK`, and only MacMoney's restore (or the documented format) can open it.

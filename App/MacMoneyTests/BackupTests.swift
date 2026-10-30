@@ -40,7 +40,7 @@ final class BackupTests: XCTestCase {
             for i in 0..<3 { ctx.insert(Entry(account: a, date: Day.today, amountCents: -100 * (i + 1))) }
         }
 
-        let backup = try Backup.make(.manual, store: store, folder: folder)
+        let backup = try Backup.make(.manual, store: store, folder: folder, encryption: .none)
         XCTAssertEqual(try Backup.integrityCheck(backup), ["ok"])
         XCTAssertEqual(try entryCount(backup), 3)
 
@@ -52,7 +52,7 @@ final class BackupTests: XCTestCase {
 
         // …then restore the way the app does on relaunch.
         try Backup.scheduleRestore(from: backup)
-        let msg = Backup.applyPendingRestore(store: store, folder: folder)
+        let msg = Backup.applyPendingRestore(store: store, folder: folder, encryption: .none)
         XCTAssertTrue(msg?.hasPrefix("Restored") ?? false, msg ?? "nil")
         XCTAssertEqual(try entryCount(store), 3)
 
@@ -68,10 +68,10 @@ final class BackupTests: XCTestCase {
         let folder = dir.appendingPathComponent("Backups")
         try withStore(store) { $0.insert(Account(name: "A")) }
         let base = Date(timeIntervalSince1970: 1_800_000_000)
-        try Backup.make(.manual, store: store, folder: folder, keep: 3, now: base)
+        try Backup.make(.manual, store: store, folder: folder, keep: 3, now: base, encryption: .none)
         for i in 1...6 {
             try Backup.make(i % 2 == 0 ? .automatic : .beforeImport, store: store, folder: folder, keep: 3,
-                            now: base.addingTimeInterval(Double(i) * 3600))
+                            now: base.addingTimeInterval(Double(i) * 3600), encryption: .none)
         }
         let list = Backup.list(in: folder)
         XCTAssertEqual(list.filter { $0.reason == .manual }.count, 1)

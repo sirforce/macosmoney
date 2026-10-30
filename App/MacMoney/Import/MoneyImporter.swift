@@ -64,7 +64,7 @@ struct MoneyImporter {
         for p in file.payees {
             let payee = upsert(&payees, p.moneyId, &s) { Payee(name: p.name ?? "") }
             payee.name = p.name ?? ""
-            payee.isHidden = p.hidden
+            payee.isHidden = payee.hiddenOverride ?? p.hidden
             payee.accountNumber = p.accountNumber
             payee.website = p.website
             payee.notes = p.comment

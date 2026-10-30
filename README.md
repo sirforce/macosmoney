@@ -18,7 +18,7 @@ Money was discontinued years ago and only runs on Windows. MacMoney lets you mov
 | **Bills & Deposits** | Recurring items (weekly, twice a month, monthly, yearly and more) that keep their day of the month. Sort, edit the next due date and frequency, enter or skip occurrences, or pre-load everything due into the right register. Optionally flag entries as "auto-pay scheduled". |
 | **Forecast** | Today's balance, plus entries you've already entered ahead of time, plus bills and deposits not yet entered, without double counting. Choose 3–36 months or a custom date range. Hover the chart to see what moves the balance each day; click to highlight those transactions; double-click to open one. |
 | **Business / Schedule C** | One or more businesses. Link whole accounts, or tag individual transactions in a personal account where business and personal are mixed. Map categories to Schedule C lines. Supports business-use %, 50% meals and vehicles (standard mileage or actual expenses with a trip log). Produces a Schedule C and a profit & loss report per business or for all of them, with CSV for your accountant. |
-| **Backup & restore** | Verified point-in-time backups: manual, automatic when the app quits (each time, daily, weekly or monthly), keep the last *N*, optionally in iCloud Drive. A safety backup is taken before every import and every restore. **Check Data File** looks for database damage and bookkeeping inconsistencies. |
+| **Backup & restore** | Verified point-in-time backups: manual, automatic when the app quits (each time, daily, weekly or monthly), keep the last *N*, optionally **AES-256 encrypted** and optionally in iCloud Drive. A safety backup is taken before every import and every restore. **Check Data File** looks for database damage and bookkeeping inconsistencies. |
 
 See the **[User Guide](docs/user-guide.md)** for a full walkthrough.
 
@@ -55,7 +55,8 @@ The original file is copied before it's read and is never modified. Details: **[
 | What | Where |
 |---|---|
 | Data file | `~/Library/Application Support/MacMoney/MacMoney.store` (SQLite, via SwiftData) |
-| Backups | `~/Library/Application Support/MacMoney/Backups/` by default (configurable, for example iCloud Drive) |
+| Backups | `~/Library/Application Support/MacMoney/Backups/` by default (configurable, for example iCloud Drive). Optionally encrypted. |
+| Backup password | Your login keychain (item "MacMoney backup password") |
 | Settings | `defaults read io.github.macmoney.MacMoney` |
 
 Nothing is sent anywhere. The app makes no network connections. The only download happens at build time, when the converter's open-source libraries are fetched.

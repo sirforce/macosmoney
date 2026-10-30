@@ -42,7 +42,16 @@ enum Backup {
         let date: Date
         let reason: Reason
         let size: Int
+        let encrypted: Bool
         var id: URL { url }
+    }
+
+    /// Where a backup's password comes from.
+    enum Encryption {
+        /// Encrypt if Settings ▸ Backup says so, with the keychain password.
+        case settings
+        case none
+        case password(String)
     }
 
     struct Failure: LocalizedError {
@@ -73,6 +82,10 @@ enum Backup {
         static let last = "backup.lastAutomatic"
         static let pendingRestore = "backup.pendingRestore"
         static let lastRestoreResult = "backup.lastRestoreResult"
+        static let pendingRestoreIsStaged = "backup.pendingRestoreIsStaged"
+        static let pendingRestoreName = "backup.pendingRestoreName"
+        static let encrypt = "backup.encrypt"
+        static let lastError = "backup.lastError"
     }
 
     static func registerDefaults() {
@@ -94,13 +107,28 @@ enum Backup {
         Frequency(rawValue: UserDefaults.standard.string(forKey: Key.frequency) ?? "") ?? .everyExit
     }
     static var keepCount: Int { max(1, UserDefaults.standard.integer(forKey: Key.keep)) }
+    static var encryptionEnabled: Bool { UserDefaults.standard.bool(forKey: Key.encrypt) }
+
+    static func password(for encryption: Encryption) throws -> String? {
+        switch encryption {
+        case .none: return nil
+        case .password(let p): return p
+        case .settings:
+            guard encryptionEnabled else { return nil }
+            guard let p = BackupKeychain.password() else {
+                throw Failure(message: "Backups are set to be encrypted, but the password isn't in the keychain. Set it again in Settings ▸ Backup.")
+            }
+            return p
+        }
+    }
 
     // MARK: Making backups
 
     /// Writes a verified snapshot of `store` into `folder` and prunes old automatic copies.
     @discardableResult
     static func make(_ reason: Reason, store: URL = storeURL, folder: URL = folder,
-                     keep: Int = keepCount, now: Date = Date()) throws -> URL {
+                     keep: Int = keepCount, now: Date = Date(), encryption: Encryption = .settings) throws -> URL {
+        let password = try password(for: encryption)
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         let stamp = stampFormatter.string(from: now)
         var dest = folder.appendingPathComponent("MacMoney \(stamp) (\(reason.rawValue)).\(fileExtension)")
@@ -109,15 +137,65 @@ enum Backup {
             dest = folder.appendingPathComponent("MacMoney \(stamp) (\(reason.rawValue)) \(n).\(fileExtension)")
             n += 1
         }
-        try snapshot(from: store, to: dest)
+        if let password {
+            try writeEncrypted(from: store, to: dest, password: password)
+        } else {
+            try snapshot(from: store, to: dest)
+            do {
+                try verify(dest)
+            } catch {
+                try? FileManager.default.removeItem(at: dest)
+                throw error
+            }
+            try? FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: dest.path)
+        }
+        prune(folder: folder, keep: keep)
+        return dest
+    }
+
+    /// Snapshot → verify → encrypt → decrypt again and verify. The plaintext only ever exists in a
+    /// private temp folder that is removed afterwards.
+    static func writeEncrypted(from store: URL, to dest: URL, password: String) throws {
+        let work = try privateWorkFolder()
+        defer { try? FileManager.default.removeItem(at: work) }
+        let plain = work.appendingPathComponent("snapshot.sqlite")
+        try snapshot(from: store, to: plain)
+        try verify(plain)
+        try encryptVerified(plain, to: dest, password: password, work: work)
+    }
+
+    private static func encryptVerified(_ plain: URL, to dest: URL, password: String, work: URL) throws {
         do {
-            try verify(dest)
+            try BackupCrypto.encrypt(plain, to: dest, password: password)
+            let check = work.appendingPathComponent("check-\(UUID().uuidString).sqlite")
+            try BackupCrypto.decrypt(dest, to: check, password: password)
+            try verify(check)
         } catch {
             try? FileManager.default.removeItem(at: dest)
             throw error
         }
-        prune(folder: folder, keep: keep)
-        return dest
+    }
+
+    private static func privateWorkFolder() throws -> URL {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("MacMoney-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
+        return url
+    }
+
+    /// Encrypts the unencrypted backups in a folder in place. Returns how many were converted.
+    @discardableResult
+    static func encryptExisting(in folder: URL = folder, password: String) throws -> Int {
+        let work = try privateWorkFolder()
+        defer { try? FileManager.default.removeItem(at: work) }
+        var count = 0
+        for b in list(in: folder) where !b.encrypted {
+            try verify(b.url)
+            let temp = folder.appendingPathComponent(".encrypting-\(UUID().uuidString)")
+            try encryptVerified(b.url, to: temp, password: password, work: work)
+            _ = try FileManager.default.replaceItemAt(b.url, withItemAt: temp)
+            count += 1
+        }
+        return count
     }
 
     /// The quit-time hook: backs up if automatic backups are on and one is due.
@@ -125,7 +203,14 @@ enum Backup {
         let d = UserDefaults.standard
         guard d.bool(forKey: Key.auto), FileManager.default.fileExists(atPath: storeURL.path) else { return }
         if let last = d.object(forKey: Key.last) as? Date, now.timeIntervalSince(last) < frequency.interval { return }
-        if (try? make(.automatic, now: now)) != nil { d.set(now, forKey: Key.last) }
+        do {
+            try make(.automatic, now: now)
+            d.set(now, forKey: Key.last)
+            d.removeObject(forKey: Key.lastError)
+        } catch {
+            d.set("Automatic backup on \(now.formatted(date: .abbreviated, time: .shortened)) failed: \(error.localizedDescription)",
+                  forKey: Key.lastError)
+        }
     }
 
     /// Lists backups in a folder, newest first.
@@ -137,7 +222,7 @@ enum Backup {
             let name = url.deletingPathExtension().lastPathComponent
             let reason = Reason.allCases.first { name.contains("(\($0.rawValue))") } ?? .manual
             let date = parseStamp(name) ?? v?.creationDate ?? .distantPast
-            return Info(url: url, date: date, reason: reason, size: v?.fileSize ?? 0)
+            return Info(url: url, date: date, reason: reason, size: v?.fileSize ?? 0, encrypted: BackupCrypto.isEncrypted(url))
         }
         .sorted { $0.date > $1.date }
     }
@@ -150,27 +235,52 @@ enum Backup {
     // MARK: Restoring
 
     /// Checks the file and records it; the swap happens on the next launch (see `applyPendingRestore`).
-    static func scheduleRestore(from url: URL) throws {
-        try verify(url)
-        UserDefaults.standard.set(url.path, forKey: Key.pendingRestore)
+    /// An encrypted backup is decrypted now (with `password`, else the keychain password) into a
+    /// staging file next to the data file, which is removed once the restore is done.
+    static func scheduleRestore(from url: URL, password: String? = nil, stagingFolder: URL = dataFolder) throws {
+        let d = UserDefaults.standard
+        if BackupCrypto.isEncrypted(url) {
+            guard let pw = password ?? BackupKeychain.password() else { throw BackupCrypto.Failure.passwordNeeded }
+            let staged = stagingFolder.appendingPathComponent(".restore-staged-\(UUID().uuidString).sqlite")
+            do {
+                try BackupCrypto.decrypt(url, to: staged, password: pw)
+                try verify(staged)
+            } catch {
+                try? FileManager.default.removeItem(at: staged)
+                throw error
+            }
+            d.set(staged.path, forKey: Key.pendingRestore)
+            d.set(true, forKey: Key.pendingRestoreIsStaged)
+        } else {
+            try verify(url)
+            d.set(url.path, forKey: Key.pendingRestore)
+            d.set(false, forKey: Key.pendingRestoreIsStaged)
+        }
+        d.set(url.lastPathComponent, forKey: Key.pendingRestoreName)
     }
 
     /// Called before the store is opened. Makes a safety backup of the current data, then puts the
     /// chosen backup in place. Returns a message for the user, or nil if nothing was pending.
     @discardableResult
-    static func applyPendingRestore(store: URL = storeURL, folder: URL = folder) -> String? {
+    static func applyPendingRestore(store: URL = storeURL, folder: URL = folder,
+                                    encryption: Encryption = .settings) -> String? {
         let d = UserDefaults.standard
         guard let path = d.string(forKey: Key.pendingRestore) else { return nil }
         d.removeObject(forKey: Key.pendingRestore)
         let source = URL(fileURLWithPath: path)
+        let name = d.string(forKey: Key.pendingRestoreName) ?? source.lastPathComponent
+        let staged = d.bool(forKey: Key.pendingRestoreIsStaged)
+        d.removeObject(forKey: Key.pendingRestoreName)
+        d.removeObject(forKey: Key.pendingRestoreIsStaged)
+        defer { if staged { try? FileManager.default.removeItem(at: source) } }
         let message: String
         do {
             try verify(source)
             if FileManager.default.fileExists(atPath: store.path) {
-                try make(.beforeRestore, store: store, folder: folder)
+                try make(.beforeRestore, store: store, folder: folder, encryption: encryption)
             }
             try replaceStore(store, with: source)
-            message = "Restored \(source.lastPathComponent). Your previous data was saved as a “Before restore” backup."
+            message = "Restored \(name). Your previous data was saved as a “Before restore” backup."
         } catch {
             message = "Restore failed — your data was not changed. \(error.localizedDescription)"
         }
