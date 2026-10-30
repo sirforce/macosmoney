@@ -9,6 +9,7 @@ import Observation
 /// Built in full at launch and after imports; ordinary edits update only the rows that changed.
 struct EntryRow: Identifiable {
     let id: PersistentIdentifier
+    let uuid: UUID
     let accountID: PersistentIdentifier?
     let accountName: String
     let payeeID: PersistentIdentifier?
@@ -121,7 +122,7 @@ final class LedgerIndex {
                 payeeName[id] = p.name
                 if p.isHidden { hiddenPayees.insert(id) } else { hiddenPayees.remove(id) }
             case "Account": accountsChanged = true
-            case "Bill", "ImportRecord", "MileageEntry", "ReportPreset", "Scenario", "ScenarioItem", "BankRecord", "BankImportBatch": continue
+            case "Bill", "ImportRecord", "MileageEntry", "ReportPreset", "Scenario", "ScenarioItem", "BankRecord", "BankImportBatch", "Purchase", "PurchaseItem", "PurchaseFile", "AppSettings": continue
             default: return false
             }
         }
@@ -189,7 +190,7 @@ final class LedgerIndex {
         let order: Int
         if let m = e.moneyId { order = m } else { nextOrder += 1; order = nextOrder }
         return EntryRow(
-            id: e.persistentModelID, accountID: aid, accountName: info.name, payeeID: pid, date: e.date,
+            id: e.persistentModelID, uuid: e.uuid, accountID: aid, accountName: info.name, payeeID: pid, date: e.date,
             number: number, payee: payee, category: category, memo: memo,
             amount: e.amountCents, effect: e.isVoid ? 0 : e.amountCents, status: e.status, isVoid: e.isVoid,
             isFlagged: e.isFlagged, flagNote: e.flagNote ?? "", flagDate: e.flagDate, isReadOnly: info.readOnly,

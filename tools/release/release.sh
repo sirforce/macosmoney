@@ -2,7 +2,7 @@
 # Builds a release of MacMoney: archive → sign with Developer ID (hardened runtime) → notarize →
 # staple → DMG → install into /Applications.
 #
-# Usage: tools/release/release.sh [--skip-tests] [--no-notarize] [--no-install]
+# Usage: tools/release/release.sh [--skip-tests] [--no-notarize] [--no-dmg] [--no-install]
 #
 # Configuration comes from tools/release/release.env (git-ignored; copy release.env.example).
 set -euo pipefail
@@ -16,12 +16,13 @@ fail() { printf '\n\033[1;31m✗ %s\033[0m\n' "$*" >&2; exit 1; }
 SIGN_IDENTITY=${SIGN_IDENTITY:-"Developer ID Application"}
 NOTARY_PROFILE=${NOTARY_PROFILE:-MacMoney-notary}
 
-TESTS=1 NOTARIZE=1 INSTALL=1
+TESTS=1 NOTARIZE=1 INSTALL=1 DMG_STEP=1
 for arg in "$@"; do
   case $arg in
     --skip-tests) TESTS=0 ;;
     --no-notarize) NOTARIZE=0 ;;
     --no-install) INSTALL=0 ;;
+    --no-dmg) DMG_STEP=0 ;;
     *) fail "Unknown option $arg" ;;
   esac
 done
@@ -79,17 +80,22 @@ if [ $NOTARIZE = 1 ]; then
   xcrun stapler staple "$APP"
 fi
 
+if [ $DMG_STEP = 1 ]; then
 step "Building disk image"
 STAGE=$(mktemp -d)
 ditto "$APP" "$STAGE/MacMoney.app"
 ln -s /Applications "$STAGE/Applications"
 hdiutil create -volname "MacMoney $VERSION" -srcfolder "$STAGE" -ov -format UDZO "$DMG" -quiet
 rm -rf "$STAGE"
+# A mounted copy (opened in Finder, say) makes notarytool stall at "initiating connection".
+hdiutil info | awk -v img="$DMG" '$1=="image-path" && $3==img {f=1; next} f && /^\/dev\/disk[0-9]+[ \t]/ {print $1; exit} /^====/ {f=0}' |
+  while read -r dev; do hdiutil detach "$dev" -quiet || hdiutil detach "$dev" -force -quiet; done
 codesign --sign "$SIGN_IDENTITY" --timestamp "$DMG"
 if [ $NOTARIZE = 1 ]; then
   notarize "$DMG"
   xcrun stapler staple "$DMG"
   spctl --assess --type open --context context:primary-signature -v "$DMG"
+fi
 fi
 
 if [ $INSTALL = 1 ]; then
@@ -106,4 +112,5 @@ if [ $INSTALL = 1 ]; then
   open /Applications/MacMoney.app
 fi
 
-printf '\n\033[1;32m✓ MacMoney %s (build %s)\033[0m\n  App: %s\n  DMG: %s\n' "$VERSION" "$BUILD" "$APP" "$DMG"
+printf '\n\033[1;32m✓ MacMoney %s (build %s)\033[0m\n  App: %s\n' "$VERSION" "$BUILD" "$APP"
+if [ $DMG_STEP = 1 ]; then printf "  DMG: %s\n" "$DMG"; fi

@@ -6,7 +6,8 @@ import SwiftData
 struct TagTransactionsView: View {
     @Environment(\.modelContext) private var context
     @Environment(LedgerIndex.self) private var index
-    @Query(sort: \Account.name) private var accounts: [Account]
+    @Query(sort: \Account.name) private var accountsByName: [Account]
+    private var accounts: [Account] { accountsByName.inSidebarOrder }
     @Query(sort: \Vehicle.name) private var vehicles: [Vehicle]
     let business: Business
 

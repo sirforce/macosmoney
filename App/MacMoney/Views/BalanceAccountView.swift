@@ -122,6 +122,7 @@ struct BalanceAccountView: View {
             statement = try reconciler.enterChargesAndInterest(s)
             // Charges are now in the register; a postponed session must not add them again.
             Reconciler.postpone(statement, for: account)
+            try? context.save()
             phase = .marking
         } catch {
             self.error = error.localizedDescription
@@ -184,7 +185,7 @@ struct BalanceAccountView: View {
                 Text(difference == 0 ? "Balanced. Click Finish to mark these transactions reconciled." : "Keep marking until the difference is zero.")
                     .foregroundStyle(difference == 0 ? .green : .secondary)
                 Spacer()
-                Button("Postpone") { Reconciler.postpone(statement, for: account); dismiss() }
+                Button("Postpone") { Reconciler.postpone(statement, for: account); try? context.save(); dismiss() }
                     .help("Keep your marks and come back to it later")
                 Button("Finish") { difference == 0 ? finish(adjust: false) : (confirmAdjust = true) }
                     .keyboardShortcut(.defaultAction)

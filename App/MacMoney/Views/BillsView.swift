@@ -152,7 +152,8 @@ struct BillEditor: View {
     @Bindable var bill: Bill
     var onEnter: () -> Void
 
-    @Query(sort: \Account.name) private var accounts: [Account]
+    @Query(sort: \Account.name) private var accountsByName: [Account]
+    private var accounts: [Account] { accountsByName.inSidebarOrder }
     @Environment(LedgerIndex.self) private var index
 
     @State private var payeeName = ""

@@ -40,10 +40,14 @@ The toolbar has **New Account** (+) and **Import from Money**.
 ## Accounts
 
 - **New account:** toolbar **+**. Choose a name, type (bank, credit card, investment, loan), opening balance (enter what you owe on a card or loan as a negative number), date opened, account number, notes and, optionally, the **business** it belongs to.
+- **Arrange:** drag accounts up and down in the sidebar to put them in the order you want. Closed accounts can be arranged among themselves. Account pickers elsewhere (transfers, bills, forecast, imports) follow the same order, and new accounts appear at the end until you move them.
 - **Edit / Close / Reopen / Delete:** right-click an account in the sidebar.
   - **Closing** keeps the history and makes the account read-only.
   - **Deleting** removes it and all its transactions, after a confirmation. An account that came from Money comes back on the next re-import, so close it instead.
-- For imported accounts, the name, opening balance and closed status are refreshed on each re-import. The business link and notes you set in MacMoney are kept.
+- **Set Balance…** (right-click an account, or **Account ▸ Set Balance…**): enter the balance the bank shows on a date, such as today's balance or a statement's ending balance. The sheet shows what MacMoney has and the difference before anything changes.
+  - If nothing in the account came from Money (for example an account filled from a download that only goes back two years), the **opening balance** changes, so all of the history works backward from the balance you entered.
+  - If the account has Money history, one reconciled **Balance Correction** is added on that date and the Money history is left as it is.
+- For imported accounts, the name and opening balance are refreshed on each re-import. Closing or reopening the account in MacMoney, its place in the sidebar, the business link and notes you set are kept.
 
 ## Registers
 
@@ -64,12 +68,13 @@ Select an account to open its register.
 
 **View menu** (toolbar): All transactions · Unreconciled (default) · Flagged · Uncleared · Last 30 days · Last 12 months · This year · Last year · Upcoming.
 
-**Search** (toolbar field): matches memo, payee, number, category or amount. It always searches the whole account, whatever view is selected.
+**Search** (toolbar field): matches memo, payee, number, category, amount or the bank's original description. It always searches the whole account, whatever view is selected. Click in the field and choose **All Accounts** under it to search every account instead (open and closed). The results show each match's account, and double-clicking one opens it in its register. The choice is remembered. **Find Transactions** (⇧⌘F) does the same with extra filters (memo only, period).
 
 **Sorting and columns:** click a column header to sort, and click again to reverse. Drag columns to reorder or resize them; the layout is remembered. Sorting by Date keeps Money's order for entries on the same day.
 
 **Right-click a transaction** for:
 
+- **Show All Transactions for “Payee”:** opens the payee on the Payees page with every transaction from all dates and all accounts. **Return to [account]** in the toolbar (or ⌘[ ) brings you back to the same transaction in the register. This works in closed accounts too.
 - **Business:** assign it to a business, mark it personal, or go back to the account's default.
 - **Mark As:** Uncleared, Cleared or Reconciled.
 - **Add Flag / Clear Flag**, and **Edit Flag…** for the note and action date.
@@ -129,6 +134,8 @@ Balancing done in MacMoney survives re-import: a transaction you reconciled stay
 - If you delete an imported transaction, it stays deleted. Importing the file again doesn't bring it back.
 - Bank imports are MacMoney's own data, so re-importing from Money leaves them alone.
 
+**Downloads that don't go back to the beginning:** most banks only export a year or two, so an account built from a download can start from the wrong amount. Use the balance check while importing, or **Set Balance…** afterwards, with any balance you know (today's is fine).
+
 **History and undo:** the **History** tab lists every import, with what it added and from which files. **Undo…** removes the transactions an import added, plus its balance correction, and makes a backup first. The files can then be imported again.
 
 ## Flags
@@ -186,6 +193,8 @@ Your choice survives re-importing from Money, even if the payee's hidden setting
 - **Back / Forward** (toolbar chevrons, **⌘[** / **⌘]**) step through the payees, sources and overview you've viewed, like a web browser.
 - The **breadcrumb** at the top of a report ("‹ Income overview › Acme Staffing") returns to the overview in one click.
 - **Overview** (toolbar, **⌘0**) or **Show Overview** under the list clears the selection.
+- **Opened from a register** (right-click ▸ Show All Transactions): a **Return to [account]** button takes you back to that transaction, and Back goes there once you've stepped back past the first payee.
+- **Double-click** a transaction in a payee's list to open it in its register.
 
 ### Presets
 
@@ -259,6 +268,43 @@ See **[Schedule C & Businesses](schedule-c.md)** for the full guide. In short:
 4. **Vehicles & Mileage:** add vehicles, log trips, choose standard mileage or actual expenses.
 5. **Schedule C** and **Profit & Loss** tabs give the reports, with CSV export.
 
+## Purchases
+
+**Purchases** (its own section in the sidebar) lists what you've bought, item by item, whether it was for you or for a business. Marking an item business or personal is how business spending gets onto Schedule C without retyping receipts. The badge shows how many purchases from 2026 on haven't been sorted yet.
+
+**Enter a purchase by hand.** Use this for any store: a music shop, a camera store, a receipt from the counter.
+
+- **From the charge (easiest):** in a register, right-click the card or bank charge ▸ **Itemize Purchase…**. The vendor, date and amount are filled in and the purchase is linked to that charge. Split it into items, and mark each one business or personal as you go. If the items don't add up to the charge, MacMoney shows what's left and offers to add it as *Tax & shipping*.
+- **From Purchases:** click **New Purchase** in the toolbar. Choose the charge that paid for it under **Paid with**: nearby charges are listed with the closest amount first. You can also leave it unlinked, for example for a cash receipt.
+- **Web links:** add the store's order page or an emailed receipt link in **Link**. **Open Order Page** opens it in your default browser.
+- Double-click a purchase you entered (or right-click ▸ **Edit Purchase…**) to change it or delete it. Tags, lines and purposes already set on its items are kept.
+
+**Bring in your Amazon orders**
+
+1. On Amazon, go to **Account ▸ Request Your Data** and request **Your Orders**. Amazon emails a download link.
+2. Unzip it, then drag the folder onto the MacMoney window, or click **Import Amazon Orders…** in Purchases. (If you drop it along with bank downloads, Import Bank Files offers **Import into Purchases**.)
+3. Each shipment becomes a purchase with its items. Cancelled orders are skipped, digital orders are included, and refunds are noted on the order. Addresses are never read.
+
+Importing a newer export later adds only what's new. Your tags, purposes, notes and links stay as they are.
+
+**Linking to card charges.** Amazon charges your card when each shipment leaves. MacMoney links a shipment to an Amazon charge of exactly the same amount from 2 days before to 5 days after it shipped, preferring the card Amazon says was used. A 🔗 in the list means it's linked. Orders paid partly with a gift card can't match by amount, so link them yourself: right-click ▸ **Link to Charge…** lists nearby charges with the closest amounts first. In a register, a linked charge shows its items in the memo column (when the memo is empty) and in the tooltip; right-click ▸ **Show Purchase** jumps to it.
+
+**Marking items**
+
+- Select one or more items and press **B** for business or **P** for personal (**U** undoes). The buttons at the bottom and the right-click menu do the same.
+- The panel on the right sets the **Schedule C line**, **business use %**, a **purpose** and **Returned**. MacMoney suggests a line when you mark an item business: office products, software, books and digital items go to Line 18 (office expense), anything of $2,500 or more to *Equipment / asset purchase* for your accountant to depreciate, and everything else to Line 22 (supplies).
+- **Show** filters the list: *Needs review* (the default), *Business*, *Personal*, *Not linked to a charge* or *All*. Only purchases from 2026 on count as needing review. Older history is there for searching.
+- With more than one business, **For** chooses which business **B** marks items for.
+- Double-click an item to open the charge that paid for it.
+- **Hiding:** press **H** (or right-click ▸ **Hide Item**, or tick **Hidden** in the right-hand panel) to tidy away items you never want to see again, such as gifts or old household orders. Hidden items drop out of the list, out of search and out of the review count; a purchase whose items are all hidden no longer needs review. Tick **Show hidden** to see them again (dimmed), then press **H** or choose **Unhide** to bring one back. Hiding doesn't change an item's business tag or any totals.
+- **Notes:** each item has its own **Notes** in the right-hand panel; the order has **Order notes**. Search covers item notes.
+- **Receipts:** attach any number of files to an item, from anywhere on your Mac: click **Add Receipt…**, or drop files on the right-hand panel. Select several items first to attach the same receipt to all of them.
+  - The files stay where they are. MacMoney remembers where they are, not what's in them, so backups don't grow and don't include your receipts. Renaming or moving a file on the same disk is followed automatically.
+  - Click 🔍 (or right-click ▸ **Show in Finder**) to open its folder in Finder with the file selected. Double-click a receipt to open it.
+  - A 📎 in the list marks items with receipts (a note icon marks items with only notes); click it to show the receipt in Finder.
+  - If a file was deleted or moved to another disk, it's shown in orange: **Locate…** points to it again, and **Remove** forgets it.
+- **On the web:** Amazon purchases have **View Order on Amazon** and **View Item** (the product page) in the right-hand panel and the right-click menu. They open in your default browser, where you're already signed in. A register charge linked to a purchase has the same choice in its right-click menu.
+
 ## Backups and data file checks
 
 See **[Backup & Restore](backup-and-restore.md)**. In short:
@@ -281,6 +327,7 @@ See **[Backup & Restore](backup-and-restore.md)**. In short:
 | ⇧⌘B | Backups |
 | ⇧⌘R | Balance Account |
 | ⇧⌘U | Import Bank Files |
+| B / P / U / H | Purchases: mark selected items business / personal / not reviewed; hide or unhide |
 | ⌘[ / ⌘] | Back / Forward (Payees, Deposit Sources) |
 | ⌘0 | Overview (Payees, Deposit Sources) |
 | ⌘, | Settings |

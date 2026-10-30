@@ -22,6 +22,9 @@ struct FastTable<Row: Identifiable>: NSViewRepresentable where Row.ID: Hashable 
     var menu: ((Set<Row.ID>) -> [FastMenuItem])?
     var onDoubleClick: ((Row) -> Void)?
     var onDelete: ((Set<Row.ID>) -> Void)?
+    /// A plain key (no ⌘/⌃/⌥) pressed with rows selected; return true if handled. Lets lists offer
+    /// one-key actions such as B for business.
+    var onKey: ((String, Set<Row.ID>) -> Bool)?
 
     func makeCoordinator() -> Coordinator { Coordinator(self) }
 
@@ -46,6 +49,7 @@ struct FastTable<Row: Identifiable>: NSViewRepresentable where Row.ID: Hashable 
         let c = context.coordinator
         let table = FastTableView()
         table.onDelete = { [weak c] in c?.deletePressed() }
+        table.onKey = { [weak c] key in c?.keyPressed(key) ?? false }
         table.usesAutomaticRowHeights = false
         table.rowHeight = 22
         table.style = .fullWidth
@@ -218,6 +222,12 @@ struct FastTable<Row: Identifiable>: NSViewRepresentable where Row.ID: Hashable 
             parent.onDoubleClick?(display[r])
         }
 
+        func keyPressed(_ key: String) -> Bool {
+            let ids = selectedIDs
+            guard !ids.isEmpty, let handler = parent.onKey else { return false }
+            return handler(key, ids)
+        }
+
         func deletePressed() {
             let ids = selectedIDs
             if !ids.isEmpty { parent.onDelete?(ids) }
@@ -333,10 +343,14 @@ private final class MenuAction: NSObject {
 
 private final class FastTableView: NSTableView {
     var onDelete: () -> Void = {}
+    var onKey: (String) -> Bool = { _ in false }
 
     override func keyDown(with event: NSEvent) {
         // Delete / forward delete
-        if event.keyCode == 51 || event.keyCode == 117 { onDelete() } else { super.keyDown(with: event) }
+        if event.keyCode == 51 || event.keyCode == 117 { onDelete(); return }
+        let mods = event.modifierFlags.intersection([.command, .control, .option])
+        if mods.isEmpty, let key = event.charactersIgnoringModifiers?.lowercased(), key.count == 1, onKey(key) { return }
+        super.keyDown(with: event)
     }
 }
 

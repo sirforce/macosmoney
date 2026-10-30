@@ -297,6 +297,7 @@ private struct VehicleDetail: View {
 }
 
 private struct MileageRatesEditor: View {
+    @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
     @State private var rates: [(year: Int, cents: String)] = []
 
@@ -319,7 +320,8 @@ private struct MileageRatesEditor: View {
                 Button("Save") {
                     var all: [Int: Double] = [:]
                     for r in rates { if let v = Double(r.cents) { all[r.year] = v } }
-                    MileageRates.all = all
+                    AppSettings.current(in: context).mileageRates = all
+                    try? context.save()
                     dismiss()
                 }
                 .keyboardShortcut(.defaultAction)
@@ -329,7 +331,7 @@ private struct MileageRatesEditor: View {
         .padding(24)
         .frame(width: 460)
         .onAppear {
-            let current = MileageRates.all
+            let current = MileageRates.all(AppSettings.current(in: context))
             let now = Day.year(of: Day.today)
             rates = (2015...(now + 1)).reversed().map { y in (y, current[y].map { String($0) } ?? "") }
         }

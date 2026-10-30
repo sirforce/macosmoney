@@ -82,4 +82,39 @@ final class ReconcileTests: XCTestCase {
         Reconciler.clearPending(for: account)
         XCTAssertNil(Reconciler.pending(for: account))
     }
+
+    // MARK: Set Balance
+
+    func testSetBalanceMovesOpeningWhenHistoryIsIncomplete() throws {
+        // A savings account filled from a two-year download: more went out than came in.
+        let savings = Account(name: "Savings")
+        ctx.insert(savings)
+        ctx.insert(Entry(account: savings, date: Day.date(year: 2025, month: 1, day: 1), amountCents: 5_000_00))
+        ctx.insert(Entry(account: savings, date: Day.date(year: 2026, month: 1, day: 1), amountCents: -8_000_00))
+        try ctx.save()
+        XCTAssertEqual(BalanceAdjustment.method(for: savings), .openingBalance)
+        let today = Day.date(year: 2026, month: 10, day: 30)
+        let r = BalanceAdjustment.set(savings, to: 20_000_00, on: today, context: ctx)
+        XCTAssertEqual(r.differenceCents, 23_000_00)
+        XCTAssertNil(r.entry)
+        XCTAssertEqual(savings.openingBalanceCents, 23_000_00, "history works backward from the known balance")
+        XCTAssertEqual(BalanceAdjustment.balance(of: savings, on: today), 20_000_00)
+    }
+
+    func testSetBalanceAddsCorrectionWhenAccountHasMoneyHistory() throws {
+        let card = Account(name: "Card", kind: .creditCard)
+        ctx.insert(card)
+        let payment = Entry(account: card, date: Day.date(year: 2024, month: 5, day: 1), amountCents: 640_000_00)
+        payment.moneyId = 7
+        ctx.insert(payment)
+        ctx.insert(Entry(account: card, date: Day.date(year: 2026, month: 10, day: 1), amountCents: -100_00))
+        try ctx.save()
+        let day = Day.date(year: 2026, month: 10, day: 15)
+        let r = BalanceAdjustment.set(card, to: -1_500_00, on: day, context: ctx)
+        XCTAssertEqual(r.method, .correction)
+        XCTAssertEqual(r.entry?.status, .reconciled)
+        XCTAssertEqual(card.openingBalanceCents, 0)
+        XCTAssertEqual(BalanceAdjustment.balance(of: card, on: day), -1_500_00)
+        XCTAssertEqual(BalanceAdjustment.set(card, to: -1_500_00, on: day, context: ctx).differenceCents, 0, "already right: nothing added")
+    }
 }

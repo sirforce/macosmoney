@@ -32,6 +32,74 @@ final class BackupTests: XCTestCase {
         return n
     }
 
+    /// Everything MacMoney adds on top of Money (settings, purchases, receipts by reference, a
+    /// postponed Balance Account session, the sidebar order) comes back from a backup.
+    func testRestoreBringsBackAppData() throws {
+        let store = dir.appendingPathComponent("MacMoney.store")
+        let folder = dir.appendingPathComponent("Backups")
+        let receipt = dir.appendingPathComponent("receipt.pdf")
+        try Data("r".utf8).write(to: receipt)
+        let businessID = UUID()
+        let statement = Statement(date: Day.date(year: 2026, month: 9, day: 30), endingCents: 12_345)
+        let empty = UserDefaults(suiteName: "MacMoneyBackupTests-\(UUID().uuidString)")!
+        try withStore(store) { ctx in
+            let s = AppSettings.current(in: ctx, defaults: empty)
+            s.mileageRates = [2026: 72.5]
+            s.purchasesReviewFrom = Day.date(year: 2026, month: 7, day: 1)
+            s.purchasesBusinessUUID = businessID
+            let a = Account(name: "Card", kind: .creditCard); ctx.insert(a)
+            a.sidebarOrder = 3
+            Reconciler.postpone(statement, for: a)
+            let p = Purchase(vendor: "Music Store", date: Day.today); ctx.insert(p)
+            p.link = "example.com/orders/1"
+            let i = PurchaseItem(name: "Cable", amountCents: 999); ctx.insert(i); i.purchase = p
+            i.notes = "for the studio"
+            i.businessUUID = businessID
+            ReceiptFiles.attach([receipt], to: [i], context: ctx)
+        }
+        let backup = try Backup.make(.manual, store: store, folder: folder, encryption: .none)
+
+        // Lose it all, then restore.
+        try FileManager.default.removeItem(at: store)
+        for suffix in ["-wal", "-shm"] { try? FileManager.default.removeItem(atPath: store.path + suffix) }
+        try withStore(store) { ctx in XCTAssertEqual(try ctx.fetchCount(FetchDescriptor<Purchase>()), 0) }
+        try Backup.scheduleRestore(from: backup)
+        _ = Backup.applyPendingRestore(store: store, folder: folder, encryption: .none)
+
+        try withStore(store) { ctx in
+            let s = AppSettings.current(in: ctx, defaults: empty)
+            XCTAssertEqual(try ctx.fetchCount(FetchDescriptor<AppSettings>()), 1)
+            XCTAssertEqual(MileageRates.all(s)[2026], 72.5)
+            XCTAssertEqual(MileageRates.all(s)[2025], 70, "built-in rates still there")
+            XCTAssertEqual(s.reviewFrom, Day.date(year: 2026, month: 7, day: 1))
+            XCTAssertEqual(s.purchasesBusinessUUID, businessID)
+            let a = try XCTUnwrap(try ctx.fetch(FetchDescriptor<Account>()).first)
+            XCTAssertEqual(a.sidebarOrder, 3)
+            XCTAssertEqual(Reconciler.pending(for: a), statement)
+            let i = try XCTUnwrap(try ctx.fetch(FetchDescriptor<PurchaseItem>()).first)
+            XCTAssertEqual(i.notes, "for the studio")
+            XCTAssertEqual(i.businessUUID, businessID)
+            XCTAssertEqual(i.purchase?.link, "example.com/orders/1")
+            XCTAssertEqual(i.files?.first?.locate()?.lastPathComponent, "receipt.pdf", "the receipt is found again")
+        }
+    }
+
+    func testSettingsMoveInFromPreferencesOnce() throws {
+        let defaults = UserDefaults(suiteName: "MacMoneySettingsTests-\(UUID().uuidString)")!
+        let business = UUID()
+        defaults.set(try JSONEncoder().encode([2026: 72.5]), forKey: AppSettings.legacyKeys.mileage)
+        defaults.set(Day.date(year: 2026, month: 3, day: 1), forKey: AppSettings.legacyKeys.reviewFrom)
+        defaults.set(business.uuidString, forKey: AppSettings.legacyKeys.business)
+        try withStore(dir.appendingPathComponent("Settings.store")) { ctx in
+            let s = AppSettings.current(in: ctx, defaults: defaults)
+            XCTAssertEqual(s.mileageRates, [2026: 72.5])
+            XCTAssertEqual(s.reviewFrom, Day.date(year: 2026, month: 3, day: 1))
+            XCTAssertEqual(s.purchasesBusinessUUID, business)
+            XCTAssertNil(defaults.object(forKey: AppSettings.legacyKeys.mileage), "moved, not copied")
+            XCTAssertTrue(AppSettings.current(in: ctx, defaults: defaults) === s, "one record")
+        }
+    }
+
     func testBackupAndRestoreRoundTrip() throws {
         let store = dir.appendingPathComponent("MacMoney.store")
         let folder = dir.appendingPathComponent("Backups")

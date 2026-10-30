@@ -9,6 +9,25 @@ MacMoney keeps **point-in-time copies** of your data, so you can roll back to an
 - **Every backup is checked** right after it's written, with SQLite's `PRAGMA integrity_check` plus a check that it really is a MacMoney file. A copy that fails is deleted and you're told.
 - The name records when and why it was made: *Manual*, *Automatic*, *Before import* or *Before restore*.
 
+### What's in it
+
+Everything that makes up your records:
+
+- accounts, transactions, categories, payees, bills and presets;
+- businesses, vehicles and mileage;
+- what-if scenarios;
+- bank-import history;
+- purchases, with their tags, notes and links;
+- your mileage rates and Purchases settings;
+- the sidebar order;
+- a Balance Account session you postponed.
+
+What's **not** in it:
+
+- **Receipt files.** MacMoney remembers where each one is, not what's in it. On a new Mac, put the files back in the same place, or use **Locate…** on each one.
+- **This Mac's backup settings** and the backup password, which is kept in the keychain.
+- **Window and column layout**, sorting and filters.
+
 ## Encryption
 
 **MacMoney ▸ Settings ▸ Backup ▸ Encryption.** Turn on **Encrypt backups with a password** and choose a password. It must be at least 8 characters; a passphrase of a few words is best.
@@ -32,6 +51,7 @@ How it works:
 2. Click **Restore from Backup** and choose your `.macmoneybackup`, from iCloud Drive ▸ MacMoney Backups, a USB drive or anywhere else.
 3. If the backup is encrypted, MacMoney asks for its **backup password**: the one set in MacMoney when that backup was made, not the new Mac's login password. Leave **Remember this password on this Mac** ticked to keep backups encrypted there too.
 4. MacMoney decrypts and checks the file, relaunches, and your data is back.
+5. Receipt files aren't in backups. Copy your receipts folder to the same place on the new Mac and they're found again. Otherwise, use **Locate…** in Purchases.
 
 ## Automatic backups
 

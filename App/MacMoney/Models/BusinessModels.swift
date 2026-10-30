@@ -201,20 +201,12 @@ final class MileageEntry {
 }
 
 /// IRS standard mileage rates in cents per mile, editable in the app (the IRS sets a new rate
-/// each year; check irs.gov and update when it's announced).
+/// each year; check irs.gov and update when it's announced). Edits are kept in `AppSettings`.
 enum MileageRates {
-    static let defaultsKey = "mileageRates"
     // 2022 had two rates (58.5¢ Jan–Jun, 62.5¢ Jul–Dec), so it is left for the user to enter.
     static let builtIn: [Int: Double] = [2021: 56, 2023: 65.5, 2024: 67, 2025: 70]
 
-    static var all: [Int: Double] {
-        get {
-            guard let data = UserDefaults.standard.data(forKey: defaultsKey),
-                  let saved = try? JSONDecoder().decode([Int: Double].self, from: data) else { return builtIn }
-            return builtIn.merging(saved) { _, new in new }
-        }
-        set { UserDefaults.standard.set(try? JSONEncoder().encode(newValue), forKey: defaultsKey) }
+    static func all(_ settings: AppSettings) -> [Int: Double] {
+        builtIn.merging(settings.mileageRates) { _, new in new }
     }
-
-    static func centsPerMile(_ year: Int) -> Double? { all[year] }
 }

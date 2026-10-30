@@ -76,24 +76,33 @@ struct Reconciler {
         }
         account.statementDate = s.date
         account.statementBalanceCents = s.endingCents
-        try context.save()
         Self.clearPending(for: account)
+        try context.save()
         return count
     }
 
     // MARK: Postponed sessions
 
-    private static func key(_ account: Account) -> String { "balance.pending.\(account.uuid.uuidString)" }
+    // Kept on the account, so backups include them. Earlier versions used preferences
+    // (`balance.pending.<uuid>`); a session saved there is moved over when first read.
+
+    private static func legacyKey(_ account: Account) -> String { "balance.pending.\(account.uuid.uuidString)" }
 
     static func pending(for account: Account) -> Statement? {
-        UserDefaults.standard.data(forKey: key(account)).flatMap { try? JSONDecoder().decode(Statement.self, from: $0) }
+        if account.pendingStatementJSON == nil, let data = UserDefaults.standard.data(forKey: legacyKey(account)) {
+            account.pendingStatementJSON = String(decoding: data, as: UTF8.self)
+            UserDefaults.standard.removeObject(forKey: legacyKey(account))
+        }
+        return account.pendingStatementJSON.flatMap { try? JSONDecoder().decode(Statement.self, from: Data($0.utf8)) }
     }
 
+    /// Call `save()` on the context afterwards.
     static func postpone(_ s: Statement, for account: Account) {
-        UserDefaults.standard.set(try? JSONEncoder().encode(s), forKey: key(account))
+        account.pendingStatementJSON = (try? JSONEncoder().encode(s)).map { String(decoding: $0, as: UTF8.self) }
     }
 
     static func clearPending(for account: Account) {
-        UserDefaults.standard.removeObject(forKey: key(account))
+        account.pendingStatementJSON = nil
+        UserDefaults.standard.removeObject(forKey: legacyKey(account))
     }
 }

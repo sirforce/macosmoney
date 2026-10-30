@@ -6,7 +6,8 @@ struct ForecastView: View {
     /// Opens a register entry (entry, account).
     var open: (PersistentIdentifier, PersistentIdentifier) -> Void = { _, _ in }
 
-    @Query(sort: \Account.name) private var accounts: [Account]
+    @Query(sort: \Account.name) private var accountsByName: [Account]
+    private var accounts: [Account] { accountsByName.inSidebarOrder }
     @Query private var bills: [Bill]
     @Query(sort: \Scenario.name) private var scenarios: [Scenario]
 

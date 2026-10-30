@@ -35,11 +35,22 @@ enum RegisterFilter: String, CaseIterable, Identifiable {
     }
 }
 
+enum SearchScope: String { case account, all }
+
 struct RegisterView: View {
     @Environment(\.modelContext) private var context
     @Environment(LedgerIndex.self) private var index
     let account: Account
     @Binding var focusEntry: PersistentIdentifier?
+    /// Opens an entry in its own register (for results from other accounts).
+    var open: (_ entry: PersistentIdentifier, _ account: PersistentIdentifier) -> Void = { _, _ in }
+    /// Shows every transaction for a payee (payee, entry it was picked from).
+    var showPayee: (_ payee: PersistentIdentifier, _ entry: PersistentIdentifier) -> Void = { _, _ in }
+    /// Shows a linked purchase in Purchases.
+    var showPurchase: (_ purchase: UUID) -> Void = { _ in }
+    @Query(filter: #Predicate<Purchase> { $0.entryUUID != nil }) private var linkedPurchases: [Purchase]
+    @AppStorage("register.searchScope") private var searchScope: SearchScope = .account
+    @State private var allSelection = Set<PersistentIdentifier>()
 
     @State private var filter: RegisterFilter = .unreconciled
     @State private var search = ""
@@ -48,6 +59,8 @@ struct RegisterView: View {
     @State private var pendingDelete: PersistentIdentifier?
     @State private var flagEditing: Entry?
     @State private var balancing = false
+    @State private var settingBalance = false
+    @State private var itemizing: PurchaseEditRequest?
     /// Set while jumping to an entry, so the temporary "All transactions" isn't remembered.
     @State private var jumping = false
     @Query(sort: \Business.name) private var businesses: [Business]
@@ -62,11 +75,15 @@ struct RegisterView: View {
         let flaggedCount = all.lazy.filter(\.row.isFlagged).count
 
         VStack(spacing: 0) {
+            if searchScope == .all && !q.isEmpty {
+                allAccountsResults(q)
+            } else {
             header(totals: totals, shown: rows.count, total: all.count, searching: !q.isEmpty, flagged: flaggedCount,
                    balancedThrough: all.last(where: { $0.row.status == .reconciled })?.row.date)
             Divider()
             table(rows, today: today, key: q.isEmpty ? filter.rawValue : "search")
-            if showForm {
+            }
+            if showForm && !(searchScope == .all && !q.isEmpty) {
                 Divider()
                 EntryFormView(account: account, entry: selectedEntry) { saved in
                     selection = saved?.persistentModelID
@@ -76,7 +93,12 @@ struct RegisterView: View {
         }
         .navigationTitle(account.name)
         .navigationSubtitle(account.isReadOnly ? "Closed — read only" : account.kind.label)
-        .searchable(text: $search, placement: .toolbar, prompt: "Search memo, payee, number, amount")
+        .searchable(text: $search, placement: .toolbar,
+                    prompt: searchScope == .all ? "Search all accounts" : "Search memo, payee, number, amount")
+        .searchScopes($searchScope) {
+            Text("This Account").tag(SearchScope.account)
+            Text("All Accounts").tag(SearchScope.all)
+        }
         .toolbar {
             ToolbarItem {
                 Picker("View", selection: $filter) {
@@ -119,8 +141,32 @@ struct RegisterView: View {
         }
         .sheet(item: $flagEditing) { FlagEditor(entry: $0) }
         .sheet(isPresented: $balancing) { BalanceAccountView(account: account) }
+        .sheet(isPresented: $settingBalance) { SetBalanceView(account: account) }
+        .sheet(item: $itemizing) { PurchaseEditor(request: $0) }
+        .onReceive(NotificationCenter.default.publisher(for: .setBalance)) { _ in
+            if !account.isReadOnly { settingBalance = true }
+        }
         .onReceive(NotificationCenter.default.publisher(for: .balanceAccount)) { _ in
             if !account.isReadOnly { balancing = true }
+        }
+    }
+
+    /// Matches from every account (open and closed), like Find Transactions.
+    private func allAccountsResults(_ q: String) -> some View {
+        let results = index.rows.filter { $0.matches(q) }.map(FindRow.init)
+        let net = results.reduce(0) { $0 + $1.row.effect }
+        return VStack(spacing: 0) {
+            HStack {
+                Label("\(results.count) matches in all accounts · net \(Cents.string(net))", systemImage: "magnifyingglass")
+                Spacer()
+                Text("Double-click to open in its register").font(.caption).foregroundStyle(.secondary)
+            }
+            .padding(.horizontal).padding(.vertical, 10)
+            Divider()
+            FastTable(rows: results, columns: FindView.columns, selection: $allSelection, autosave: "Find",
+                      defaultSort: ("Date", false), scrollKey: q, onDoubleClick: { r in
+                if let a = r.row.accountID { open(r.id, a) }
+            })
         }
     }
 
@@ -204,6 +250,7 @@ struct RegisterView: View {
     private func table(_ rows: [RegisterRow], today: Date, key: String) -> some View {
         let readOnly = account.isReadOnly
         func dim(_ r: RegisterRow) -> Bool { r.row.date > today }
+        let purchases = purchasesByEntry
         let columns: [FastColumn<RegisterRow>] = [
             FastColumn("", id: "flag", width: 18, min: 18, max: 30, help: "Flag — click to flag or clear") { _ in "" } style: { r in
                 let due = r.row.flagDate.map { $0 <= today } ?? false
@@ -235,15 +282,24 @@ struct RegisterView: View {
             }
             .sortedText { $0.row.payee },
             FastColumn("", id: "business", width: 18, min: 18, max: 30, help: "Business") { _ in "" } style: { r in
-                r.row.business.isEmpty ? FastCellStyle() : FastCellStyle(
+                if let p = purchases[r.row.uuid] {
+                    return FastCellStyle(color: p.businessCents > 0 ? .controlAccentColor : .secondaryLabelColor,
+                                         symbol: p.businessCents > 0 ? "briefcase.fill" : "shippingbox",
+                                         tooltip: PurchaseRules.registerTip(p))
+                }
+                return r.row.business.isEmpty ? FastCellStyle() : FastCellStyle(
                     color: .secondaryLabelColor, symbol: "briefcase.fill",
                     tooltip: "\(r.row.business)\(r.row.taxLine.isEmpty ? " — no Schedule C line yet" : " · Line \(r.row.taxLine)")")
             }
             .sortedText { $0.row.business },
             FastColumn("Category", width: 170, min: 80) { $0.row.category } style: { FastCellStyle(color: .secondaryLabelColor, dimmed: dim($0)) }
                 .sortedText { $0.row.category },
-            FastColumn("Memo", width: 320, min: 100) { $0.row.memo } style: { r in
-                FastCellStyle(color: .secondaryLabelColor, dimmed: dim(r), tooltip: r.row.memo.isEmpty ? nil : r.row.memo)
+            FastColumn("Memo", width: 320, min: 100) { r in
+                r.row.memo.isEmpty ? (purchases[r.row.uuid]?.summary ?? "") : r.row.memo
+            } style: { r in
+                let p = r.row.memo.isEmpty ? purchases[r.row.uuid] : nil
+                return FastCellStyle(color: p != nil ? .tertiaryLabelColor : .secondaryLabelColor, dimmed: dim(r),
+                                     tooltip: p.map(PurchaseRules.registerTip) ?? (r.row.memo.isEmpty ? nil : r.row.memo))
             }
             .sortedText { $0.row.memo },
             FastColumn("Payment", width: 88, min: 60, align: .right, monospaced: true) { r in
@@ -262,7 +318,7 @@ struct RegisterView: View {
         return FastTable(rows: rows, columns: columns,
                          selection: Binding(get: { selection.map { [$0] } ?? [] }, set: { selection = $0.first }),
                          multipleSelection: false, autosave: "Register", scrollToEnd: true, scrollKey: key,
-                         menu: readOnly ? nil : { ids in ids.first.map(menuItems) ?? [] },
+                         menu: { ids in ids.first.map { readOnly ? payeeItems($0) : payeeItems($0) + menuItems($0) } ?? [] },
                          onDelete: { ids in if !readOnly, let id = ids.first { pendingDelete = id } })
     }
 
@@ -283,6 +339,28 @@ struct RegisterView: View {
             e.status = status == .cleared ? .uncleared : .cleared
             e.dateCleared = e.status == .cleared ? Day.today : nil
         }
+    }
+
+    /// "Show All Transactions for …", available in every register, including closed ones.
+    private func payeeItems(_ id: PersistentIdentifier) -> [FastMenuItem] {
+        guard let e = entry(id) else { return [] }
+        var items: [FastMenuItem] = []
+        if let purchase = purchasesByEntry[e.uuid] {
+            items.append(.button("Show Purchase (\(purchase.vendor))") { showPurchase(purchase.uuid) })
+            if let url = purchase.webURL {
+                items.append(.button(purchase.webLabel) { NSWorkspace.shared.open(url) })
+            }
+        } else if e.amountCents < 0 && !e.isSplitLine && e.transferAccount == nil {
+            items.append(.button("Itemize Purchase…") { itemizing = PurchaseEditRequest(charge: e) })
+        }
+        if let p = e.payee {
+            items.append(.button("Show All Transactions for “\(p.name)”") { showPayee(p.persistentModelID, id) })
+        }
+        return items.isEmpty ? [] : items + [.separator]
+    }
+
+    private var purchasesByEntry: [UUID: Purchase] {
+        Dictionary(linkedPurchases.compactMap { p in p.entryUUID.map { ($0, p) } }, uniquingKeysWith: { a, _ in a })
     }
 
     private func menuItems(_ id: PersistentIdentifier) -> [FastMenuItem] {
@@ -323,6 +401,7 @@ struct DateOrder: Comparable {
 extension Notification.Name {
     static let editFlag = Notification.Name("editFlag")
     static let balanceAccount = Notification.Name("balanceAccount")
+    static let setBalance = Notification.Name("setBalance")
 }
 
 /// Flag with its note and optional action date (Money's "Flag for follow up").

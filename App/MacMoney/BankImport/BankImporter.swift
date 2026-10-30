@@ -143,23 +143,11 @@ struct BankImporter {
         batch.lastDate = dates.max()
 
         if let balance {
-            let current = account.openingBalanceCents
-                + (account.entries ?? []).filter { $0.date <= balance.date }.reduce(0) { $0 + $1.balanceEffectCents }
-            let diff = balance.cents - current
-            if diff != 0 {
-                if wasEmpty {
-                    account.openingBalanceCents += diff
-                    batch.openingChangeCents = diff
-                } else {
-                    let e = Entry(account: account, date: balance.date, amountCents: diff)
-                    context.insert(e)
-                    e.payee = payee("Balance Correction")
-                    e.memo = "Brings the balance in line with the bank on \(Day.string(balance.date))"
-                    e.status = .reconciled
-                    e.dateCleared = balance.date
-                    batch.correctionEntryUUID = e.uuid
-                }
-            }
+            // A brand-new account gets an opening balance; anything else gets one correction entry.
+            let r = BalanceAdjustment.set(account, to: balance.cents, on: balance.date,
+                                          method: wasEmpty ? .openingBalance : .correction, context: context)
+            batch.openingChangeCents = r.method == .openingBalance ? r.differenceCents : 0
+            batch.correctionEntryUUID = r.entry?.uuid
         }
         try context.save()
         return batch

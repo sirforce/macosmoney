@@ -7,11 +7,15 @@ import UniformTypeIdentifiers
 struct BankImportView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
-    @Query(sort: \Account.name) private var accounts: [Account]
+    @Query(sort: \Account.name) private var accountsByName: [Account]
+    private var accounts: [Account] { accountsByName.inSidebarOrder }
     @Query(sort: \BankImportBatch.date, order: .reverse) private var batches: [BankImportBatch]
 
     /// Files handed over by a drop on the main window.
     var initialURLs: [URL] = []
+    /// Hands an Amazon order export found among the files to Purchases.
+    var importAmazon: ((URL) -> Void)?
+    @State private var amazonExport: URL?
 
     private enum Tab: String, CaseIterable { case importFiles = "Import", history = "History" }
     @State private var tab: Tab = .importFiles
@@ -100,6 +104,13 @@ struct BankImportView: View {
                 files.append(url)
             }
         }
+        // Amazon's order history goes to Purchases, not an account.
+        if let a = files.first(where: AmazonExport.isExport) { amazonExport = AmazonExport.exportRoot(a) }
+        files.removeAll(where: AmazonExport.isExport)
+        if files.isEmpty, let amazonExport, let importAmazon {
+            importAmazon(amazonExport)
+            return
+        }
         let known = Set(items.map(\.url))
         for url in files.sorted(by: { $0.path.localizedStandardCompare($1.path) == .orderedAscending }) where !known.contains(url) {
             var item = Item(url: url)
@@ -177,6 +188,15 @@ struct BankImportView: View {
         let totalMatched = plans.values.reduce(0) { $0 + $1.matches.count }
         return VStack(spacing: 0) {
             List {
+                if let amazonExport, let importAmazon {
+                    Section {
+                        HStack {
+                            Label("Amazon order history found. It goes to Purchases, not an account.", systemImage: "shippingbox")
+                            Spacer()
+                            Button("Import into Purchases") { importAmazon(amazonExport) }
+                        }
+                    }
+                }
                 Section("Files") {
                     ForEach(items) { item in fileRow(item) }
                 }

@@ -59,6 +59,10 @@ final class Account {
     /// Clues that identify this account's bank downloads ("bofa:1234", "folder:chase visa"),
     /// newline-separated, so files go to the right account automatically.
     var importHints: String = ""
+    /// Position in the sidebar, set by dragging. Accounts never arranged sort by name after the rest.
+    var sidebarOrder: Int?
+    /// A Balance Account session put off for later (a `Statement` as JSON).
+    var pendingStatementJSON: String?
     var accountNumber: String?
     var notes: String?
     var isBusiness: Bool = false
@@ -80,6 +84,27 @@ final class Account {
 
     /// Closed accounts imported from Money are kept for history and are read-only.
     var isReadOnly: Bool { isClosed }
+}
+
+extension Array where Element == Account {
+    /// The order the person arranged in the sidebar, then by name.
+    var inSidebarOrder: [Account] {
+        sorted { a, b in
+            switch (a.sidebarOrder, b.sidebarOrder) {
+            case let (x?, y?) where x != y: x < y
+            case (_?, nil): true
+            case (nil, _?): false
+            default: a.name.localizedStandardCompare(b.name) == .orderedAscending
+            }
+        }
+    }
+
+    /// Moves accounts (as `List.onMove` reports) and numbers the whole list so the order sticks.
+    func arrange(fromOffsets source: IndexSet, toOffset destination: Int) {
+        var list = self
+        list.move(fromOffsets: source, toOffset: destination)
+        for (i, a) in list.enumerated() { a.sidebarOrder = i }
+    }
 }
 
 @Model
@@ -316,6 +341,7 @@ enum Schema1 {
         Account.self, Category.self, Payee.self, Entry.self, Bill.self, ImportRecord.self,
         Business.self, Vehicle.self, MileageEntry.self, ReportPreset.self,
         Scenario.self, ScenarioItem.self, BankRecord.self, BankImportBatch.self,
+        Purchase.self, PurchaseItem.self, PurchaseFile.self, AppSettings.self,
     ]
 }
 

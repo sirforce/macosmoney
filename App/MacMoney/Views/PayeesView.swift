@@ -10,6 +10,12 @@ import UniformTypeIdentifiers
 struct PayeesView: View {
     enum Mode { case payees, depositSources }
     var mode: Mode = .payees
+    /// Open straight to this payee's transactions (e.g. from a register's right-click menu).
+    var initialPayee: PersistentIdentifier? = nil
+    /// Where the page was opened from, shown as a button to go back there.
+    var returnTo: (label: String, action: () -> Void)? = nil
+    /// Opens an entry in its register.
+    var open: (_ entry: PersistentIdentifier, _ account: PersistentIdentifier) -> Void = { _, _ in }
     private var deposits: Bool { mode == .depositSources }
     /// Settings are remembered separately for Payees and Deposit Sources.
     private var memoryKey: String { deposits ? "depositSources" : "payees" }
@@ -32,6 +38,8 @@ struct PayeesView: View {
     @State private var backStack: [Set<PersistentIdentifier>] = []
     @State private var forwardStack: [Set<PersistentIdentifier>] = []
     @State private var navigating = false
+    /// Set while opening from a register, so the temporary "All dates" isn't remembered.
+    @State private var jumping = false
     @State private var naming: PresetNaming?
 
     private enum PresetNaming: Identifiable {
@@ -235,8 +243,17 @@ struct PayeesView: View {
             showHidden = d.bool(forKey: "\(memoryKey).showHidden")
             if let f = d.object(forKey: "\(memoryKey).customFrom") as? Date { customFrom = f }
             if let t = d.object(forKey: "\(memoryKey).customTo") as? Date { customTo = t }
+            if let initialPayee {
+                // Every transaction for the payee, without changing the remembered period.
+                jumping = true
+                period = .allDates
+                move(to: [initialPayee])
+            }
         }
-        .onChange(of: period) { UserDefaults.standard.set(period.rawValue, forKey: "\(memoryKey).period") }
+        .onChange(of: period) {
+            if jumping { jumping = false; return }
+            UserDefaults.standard.set(period.rawValue, forKey: "\(memoryKey).period")
+        }
         .onChange(of: showHidden) { UserDefaults.standard.set(showHidden, forKey: "\(memoryKey).showHidden") }
         .onChange(of: customFrom) { UserDefaults.standard.set(customFrom, forKey: "\(memoryKey).customFrom") }
         .onChange(of: customTo) { UserDefaults.standard.set(customTo, forKey: "\(memoryKey).customTo") }
@@ -250,13 +267,20 @@ struct PayeesView: View {
         .toolbar {
             ToolbarItemGroup(placement: .navigation) {
                 Button { goBack() } label: { Label("Back", systemImage: "chevron.left") }
-                    .disabled(backStack.isEmpty)
+                    .disabled(backStack.isEmpty && returnTo == nil)
                     .keyboardShortcut("[", modifiers: .command)
-                    .help("Back (⌘[)")
+                    .help(backStack.isEmpty && returnTo != nil ? "Back to \(returnTo!.label) (⌘[)" : "Back (⌘[)")
                 Button { goForward() } label: { Label("Forward", systemImage: "chevron.right") }
                     .disabled(forwardStack.isEmpty)
                     .keyboardShortcut("]", modifiers: .command)
                     .help("Forward (⌘])")
+            }
+            if let returnTo {
+                ToolbarItem(placement: .navigation) {
+                    Button { returnTo.action() } label: { Label("Return to \(returnTo.label)", systemImage: "arrow.uturn.backward") }
+                        .labelStyle(.titleAndIcon)
+                        .help("Go back to the register you came from")
+                }
             }
             ToolbarItem {
                 Button { showOverview() } label: { Label("Overview", systemImage: "chart.bar.xaxis") }
@@ -416,7 +440,7 @@ struct PayeesView: View {
     // MARK: Navigation
 
     private func goBack() {
-        guard let prev = backStack.popLast() else { return }
+        guard let prev = backStack.popLast() else { returnTo?.action(); return }
         forwardStack.append(selection)
         move(to: prev)
     }
@@ -522,7 +546,8 @@ struct PayeesView: View {
             .padding(16)
             Divider()
             FastTable(rows: rows.map(PayeeEntryRow.init), columns: Self.entryColumns, selection: $reportSelection,
-                      autosave: "PayeeReport2", defaultSort: ("Date", false), scrollKey: selection)
+                      autosave: "PayeeReport2", defaultSort: ("Date", false), scrollKey: selection,
+                      onDoubleClick: { r in if let a = r.accountID { open(r.id, a) } })
                 .frame(minHeight: 200)
         }
         .fileExporter(isPresented: $exporting, document: CSVDocument(text: csv(rows)), contentType: .commaSeparatedText,
@@ -801,9 +826,11 @@ struct PayeeEntryRow: Identifiable {
     let category: String
     let memo: String
     let amount: Int
+    let accountID: PersistentIdentifier?
 
     init(_ e: EntryRow) {
         id = e.id
+        accountID = e.accountID
         date = e.date
         account = e.accountName
         number = e.number

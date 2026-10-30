@@ -7,6 +7,7 @@ tools/release/release.sh                 # tests → archive → sign → notari
 tools/release/release.sh --skip-tests    # skip the test run
 tools/release/release.sh --no-notarize   # signed only (fine for your own Mac)
 tools/release/release.sh --no-install    # build the DMG but leave /Applications alone
+tools/release/release.sh --no-dmg        # notarize and install the app only (no disk image)
 ```
 
 Output goes to `App/build/release/MacMoney-<version>-<build>/`: `MacMoney.app`, `MacMoney-<version>.dmg` and the notarization log.

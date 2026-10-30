@@ -14,8 +14,9 @@ Money was discontinued years ago and only runs on Windows. MacMoney lets you mov
 |---|---|
 | **Import from Money** | Reads `.mny` files from Money 2005 through Sunset Edition (read-only). Brings in accounts, categories, payees, transactions, splits, transfers, flags and recurring bills. Re-import as often as you like: Money's records update in place and anything you added in MacMoney is kept. |
 | **Bank & card downloads** | Import CSV, Excel and OFX/QFX downloads from Bank of America, Chase, American Express, Discover and most other banks. Drop a file or a whole folder. Re-import as often as you like: nothing is added twice, your edits are kept, deleted rows stay deleted, and payments already in the account are matched instead of duplicated. Every import can be undone. |
-| **Registers** | One register per account with running balance, cleared/reconciled status (click to toggle), flags with a note and action date, voids, transfers and split display. **Balance Account** reconciles against a statement and beeps when the difference reaches zero. View filters include Unreconciled, Flagged, Uncleared, date ranges and Upcoming. Search covers memo, payee, number and amount. Fast with 10,000+ rows. |
-| **Accounts** | Bank, credit card, investment and loan accounts. Create, edit, close (read-only) or delete them. Closed Money accounts import as read-only history. |
+| **Registers** | One register per account with running balance, cleared/reconciled status (click to toggle), flags with a note and action date, voids, transfers and split display. **Balance Account** reconciles against a statement and beeps when the difference reaches zero. View filters include Unreconciled, Flagged, Uncleared, date ranges and Upcoming. Search covers memo, payee, number and amount, in one account or all of them. Right-click a payee to see all of their transactions, then go back. Fast with 10,000+ rows. |
+| **Purchases** | What you buy, item by item, from any store. Enter a purchase by hand, or itemize a card charge right from the register, or import your whole Amazon order history (linked automatically to the card charges that paid for it). Press B or P to mark items business or personal, with a Schedule C line and purpose. Add notes, a web link and any number of receipt files (kept where they are on your Mac). Open Amazon orders and products in your browser. Hide what you don't need to see. Re-importing never loses your work. |
+| **Accounts** | Bank, credit card, investment and loan accounts. Create, edit, close (read-only) or delete them, and drag them into the order you want. **Set Balance** brings an account in line with the bank. Closed Money accounts import as read-only history. |
 | **Find** | Search every transaction in every account, with a "memo only" option and period filter. Double-click a result to jump to it in its register. |
 | **Payees & Deposit Sources** | Every payee, or only the people and companies who pay you, with use counts, this year's and all-time totals. Select one or many for a trend chart, totals by year and category, every transaction, and CSV export. Back and forward buttons move between what you've looked at. **Saved presets** recall a selection and its filters with one click. |
 | **Bills & Deposits** | Recurring items (weekly, twice a month, monthly, yearly and more) that keep their day of the month. Sort, edit the next due date and frequency, enter or skip occurrences, or pre-load everything due into the right register. Optionally flag entries as "auto-pay scheduled". |
@@ -114,7 +115,8 @@ If Money itself stores a wrong reconciled balance for an account, list it so the
 Planned, roughly in order:
 
 - **Saved reports** with PDF export (spending by category, income vs. expense, net worth)
-- **Attachments**: receipts and statements (images, PDFs) on any transaction
+- **Purchases on Schedule C**: a business purchases report for your accountant, with item tags deciding the amount for linked charges
+- **Attachments** on any transaction (receipts already work on purchases)
 - **Link card payments to checking**, then payee rules, a business review queue for Schedule C, and a spending report
 - **iCloud sync** between Macs (the data model is already CloudKit-compatible)
 - Payee rules to tag business transactions automatically

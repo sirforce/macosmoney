@@ -6,7 +6,8 @@ struct ScenariosView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \Scenario.name) private var scenarios: [Scenario]
-    @Query(sort: \Account.name) private var accounts: [Account]
+    @Query(sort: \Account.name) private var accountsByName: [Account]
+    private var accounts: [Account] { accountsByName.inSidebarOrder }
     @Query private var bills: [Bill]
     /// The scenario shown in the forecast (uuid string); new scenarios become the shown one.
     @Binding var chosen: String

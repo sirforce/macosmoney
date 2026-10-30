@@ -99,6 +99,7 @@ struct ScheduleCReport {
         let lower = range.lowerBound, upper = range.upperBound
         let entries = (try? context.fetch(FetchDescriptor<Entry>(predicate: #Predicate { $0.date >= lower && $0.date <= upper }))) ?? []
         let bid = business.persistentModelID
+        let rates = MileageRates.all(AppSettings.current(in: context))
 
         var vehicles: [PersistentIdentifier: VehicleSummary] = [:]
         for v in business.vehicles ?? [] {
@@ -109,7 +110,7 @@ struct ScheduleCReport {
                 case .business:
                     s.businessTenths += t.tenthMiles
                     let year = Day.year(of: t.date)
-                    if let rate = MileageRates.centsPerMile(year) {
+                    if let rate = rates[year] {
                         s.standardMileageCents += Int((Double(t.tenthMiles) / 10 * rate).rounded())
                     } else {
                         missing.insert(year)

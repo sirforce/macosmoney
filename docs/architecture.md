@@ -26,12 +26,15 @@ MacMoney is a SwiftUI + SwiftData app for macOS 26, plus a small Java command-li
 | `App/MacMoney/MacMoneyApp.swift` | App entry: model container, a restore pending from the last session, menu commands, Settings, and the backup on quit |
 | `Models/Models.swift` | `Account`, `Category`, `Payee`, `Entry`, `Bill`, `ImportRecord`, `ReportPreset` |
 | `Models/ScenarioModels.swift` | `Scenario`, `ScenarioItem` (what-if changes) and the plain `ScenarioAdjustment` the forecast uses |
+| `Models/AppSettings.swift` | The one settings record kept in the data file (mileage rates, Purchases choices) |
 | `Models/BusinessModels.swift` | `Business`, `Vehicle`, `MileageEntry`, `TaxLine`, `VehicleExpense`, mileage rates |
 | `BankImport/` | Bank downloads: `BankFormats` (CSV, XLSX, OFX, Discover HTML readers), `BankImporter` (fingerprints, matching, undo), `PayeeCleaner`, `BankRecord`/`BankImportBatch` models |
+| `Purchases/` | `Purchase`/`PurchaseItem`/`PurchaseFile` models, `AmazonExport` (reads Amazon's order, digital and refund CSVs), `PurchaseImporter` (dedupe and linking to charges), `PurchasesView`, `PurchaseEditor` (by hand / itemize a charge), `ReceiptFiles` |
 | `Import/` | `MoneyExportFile` (Decodable JSON, plus running the converter) and `MoneyImporter` (upsert and removal) |
 | `Support/LedgerIndex.swift` | Flat, sorted value rows for every entry, plus per-account totals and payee usage |
 | `Support/EntryStore.swift`, `BillStore.swift` | Create, edit and delete entries (keeping transfer peers in sync), and bill recurrence |
 | `Support/Forecast.swift` | Cash-flow projection |
+| `Support/BalanceAdjustment.swift` | Set Balance: opening-balance change, or a reconciled correction when there's Money history; also used by the bank import's balance check |
 | `Support/Reconcile.swift` | Balance Account: statement, cleared/difference math, finishing, postponed sessions |
 | `Support/ScheduleC.swift` | Schedule C and vehicle worksheet |
 | `Support/Backup.swift`, `DataCheck.swift` | Snapshots, staged restore, integrity checks |
@@ -116,6 +119,26 @@ Building and showing 7,500 rows takes about 5 ms.
 
 Each import is a `BankImportBatch`, which can be undone. It records added and matched rows, any balance correction or opening-balance change, and whether it reopened a closed account (`Account.closedOverride`, which Money re-imports respect). `Account.importHints` remembers each file's clues (`last4:1234`, `acct:12345`, `folder:chase visa`) so the next download goes to the same account.
 
+## Purchases
+
+A `Purchase` is one shipment or receipt, and its `PurchaseItem`s carry the tags (`businessUUID`, `isPersonal`, `taxLineRaw`, `businessPercent`, `purpose`), so one charge can be part business and part personal. Both models are app-only and in the `LedgerIndex` skip list.
+
+- **Identity:** a purchase's `importKey` is `amazon:<order id>|<ship day>`, because Amazon charges per shipment. An item's key adds the ASIN and amount (with `#n` for repeats). Re-importing creates only missing purchases and items and never touches existing ones.
+- **Refunds** are summed per order and *set* (not added) on the order's first shipment, so re-imports don't double them. Refund Details repeats rows, and identical ones count once.
+- **Linking** (`PurchaseImporter.autoLink`): an unclaimed charge whose payee or bank text looks like Amazon, of exactly the purchase total, from 2 days before to 5 days after the ship date. It prefers the account whose `importHints` contain the card's `last4:`, then the nearest date. Gift-card orders are skipped. `Purchase.entryUUID` holds the link (one charge per purchase).
+- **Receipts** are `PurchaseFile` references (path plus a plain bookmark), zero or more per item, removed with the item. File contents are never copied into the store, so backups don't include them. `locate()` resolves the bookmark first (it follows renames and moves) and updates the saved path.
+- **Manual purchases** (`source == "manual"`, no `importKey`) are made in `PurchaseEditor`, from Purchases or from a register charge (**Itemize Purchase…**). Editing updates items in place, so their tags survive.
+- The register looks up linked purchases with its own `@Query`, keyed by `EntryRow.uuid`.
+
+## Settings in the data file
+
+Anything that changes your numbers lives in the store, so backups include it:
+- `AppSettings` is a single record holding mileage rates, the Purchases review date and the default business. Earlier versions kept these in preferences; `AppSettings.current(in:)` moves them over once.
+- `Account.pendingStatementJSON` holds a postponed Balance Account session.
+- `Account.sidebarOrder` holds the sidebar order.
+
+Only layout (window, columns, sorts, filters, last selection) and this Mac's backup settings use `UserDefaults`.
+
 ## Backups
 
 - `Backup.make` uses `sqlite3_backup_*` to copy the live store into a new file, switches the copy out of WAL mode so it's a single file, checks it with `PRAGMA integrity_check`, then prunes old copies.
@@ -132,10 +155,12 @@ Each import is a `BankImportBatch`, which can be undone. It records added and ma
 | `ImportTests` | Real export, optional: reconciled balances match Money, flag rules, re-import is idempotent and keeps app data |
 | `BillTests` | Day-of-month anchoring, end dates, entering advances the bill, flags clear on reconcile, the forecast doesn't double count, transfer bills |
 | `ScheduleCTests` | Mixed and business accounts, business %, 50% meals, transfers excluded, standard vs. actual vehicle methods |
-| `BackupTests` | Round trip, restore with safety copy, pruning, rejecting non-backup files, data file check |
+| `BackupTests` | Round trip, restore with safety copy, pruning, rejecting non-backup files, data file check, app data (settings, purchases, receipts, postponed balance, sidebar order) restored, settings moved in from preferences once |
 | `BackupCryptoTests` | Encrypt/decrypt round trip, wrong password, tampering, truncation and header edits rejected, encrypted backup and restore, encrypting existing backups, no plaintext left behind |
 | `ReconcileTests` | Starting balance, difference, finish reconciles only cleared entries and clears flags, adjustments, charges entered once, postpone |
 | `BankImportTests` | Every supported format, payee cleanup, re-import adds nothing and keeps edits, deleted rows stay deleted, overlapping files, payment matching, balance correction and undo, reopening a closed account, account suggestions. Optional dry run of a real downloads folder (`TEST_RUNNER_MACMONEY_BANK_FOLDER`) |
+| `PurchaseTests` | Amazon order, digital and refund parsing, linking prefers the named card and stays inside the date window, gift-card orders left alone, re-import keeps tags/notes/links, review status and hidden items, suggested lines, web links, receipts that follow renames. Optional dry run of a real export (`TEST_RUNNER_MACMONEY_AMAZON_FOLDER`) |
+| `AccountOrderTests` | Dragging accounts sets a lasting sidebar order, and accounts never arranged follow by name |
 | `ScenarioTests` | One-time and recurring amounts, changing and stopping bills, accounts outside the forecast, cascade delete |
 | `PresetAndCurveTests` | Preset round trip, forecast curve snapping and balances |
 | `LedgerIndexTests`, `CentsTests` | Index matches the model and incremental updates are fast; money parsing; date round trips |

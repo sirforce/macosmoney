@@ -17,7 +17,10 @@ struct MacMoneyApp: App {
         WindowGroup {
             ContentView()
                 .environment(index)
-                .task { index.start(container.mainContext) }
+                .task {
+                    _ = AppSettings.current(in: container.mainContext)   // makes it, moving old preferences in
+                    index.start(container.mainContext)
+                }
         }
         .modelContainer(container)
         .defaultSize(width: 1400, height: 900)
@@ -46,6 +49,7 @@ struct MacMoneyApp: App {
             CommandMenu("Account") {
                 Button("Balance Account…") { NotificationCenter.default.post(name: .balanceAccount, object: nil) }
                     .keyboardShortcut("r", modifiers: [.command, .shift])
+                Button("Set Balance…") { NotificationCenter.default.post(name: .setBalance, object: nil) }
             }
         }
 

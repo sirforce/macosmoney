@@ -10,6 +10,15 @@ enum SidebarItem: Hashable {
     case find
     case business(PersistentIdentifier)
     case allBusinesses
+    case purchases
+}
+
+struct PayeeJump: Identifiable {
+    let id = UUID()
+    let payee: PersistentIdentifier
+    let account: PersistentIdentifier
+    let accountName: String
+    let entry: PersistentIdentifier
 }
 
 struct BankImportRequest: Identifiable {
@@ -31,6 +40,7 @@ enum SidebarMemory {
         case .forecast: "forecast"
         case .find: "find"
         case .allBusinesses: "allBusinesses"
+        case .purchases: "purchases"
         case nil: nil
         }
     }
@@ -46,6 +56,7 @@ enum SidebarMemory {
         case "forecast": return .forecast
         case "find": return .find
         case "allBusinesses": return .allBusinesses
+        case "purchases": return .purchases
         default: return nil
         }
     }
@@ -67,22 +78,37 @@ struct ContentView: View {
     @State private var focusEntry: PersistentIdentifier?
     @Query(sort: \Business.name) private var businesses: [Business]
     @State private var editingAccount: Account?
+    @State private var settingBalance: Account?
+    /// Payees page opened from a register, and how to get back.
+    @State private var payeeJump: PayeeJump?
     @State private var showNewAccount = false
     @State private var deletingAccount: Account?
     @State private var showNewBusiness = false
+    /// Purchase to show when Purchases opens (from a register), and an Amazon export to import.
+    @State private var purchaseJump: UUID?
+    @State private var pendingAmazon: URL?
+    @Query private var allPurchases: [Purchase]
 
-    private var openAccounts: [Account] { accounts.filter { !$0.isClosed } }
-    private var closedAccounts: [Account] { accounts.filter { $0.isClosed } }
+    private var openAccounts: [Account] { accounts.filter { !$0.isClosed }.inSidebarOrder }
+    private var closedAccounts: [Account] { accounts.filter { $0.isClosed }.inSidebarOrder }
 
     var body: some View {
         NavigationSplitView {
             List(selection: $selection) {
                 Section("Accounts") {
                     ForEach(openAccounts) { accountRow($0) }
+                        .onMove { from, to in
+                            openAccounts.arrange(fromOffsets: from, toOffset: to)
+                            try? context.save()
+                        }
                 }
                 if !closedAccounts.isEmpty {
                     Section(isExpanded: $showClosed) {
                         ForEach(closedAccounts) { accountRow($0) }
+                            .onMove { from, to in
+                                closedAccounts.arrange(fromOffsets: from, toOffset: to)
+                                try? context.save()
+                            }
                     } header: {
                         Text("Closed Accounts")
                     }
@@ -95,6 +121,11 @@ struct ContentView: View {
                 }
                 Section("Planning") {
                     Label("Forecast", systemImage: "chart.xyaxis.line").tag(SidebarItem.forecast)
+                }
+                Section("Purchases") {
+                    Label("All Purchases", systemImage: "shippingbox")
+                        .badge(purchasesToReview)
+                        .tag(SidebarItem.purchases)
                 }
                 Section("Business") {
                     ForEach(businesses) { b in
@@ -134,6 +165,7 @@ struct ContentView: View {
             AccountEditor(account: nil) { selection = .account($0.persistentModelID) }
         }
         .sheet(item: $editingAccount) { AccountEditor(account: $0) }
+        .sheet(item: $settingBalance) { SetBalanceView(account: $0) }
         .sheet(isPresented: $showNewBusiness) {
             BusinessEditor(business: nil) { selection = .business($0.persistentModelID) }
         }
@@ -151,8 +183,12 @@ struct ContentView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .showMoneyImport)) { _ in showImport = true }
         .onReceive(NotificationCenter.default.publisher(for: .showBankImport)) { _ in bankImport = BankImportRequest(urls: []) }
-        .sheet(item: $bankImport) { BankImportView(initialURLs: $0.urls) }
+        .sheet(item: $bankImport) { BankImportView(initialURLs: $0.urls, importAmazon: importAmazon) }
         .dropDestination(for: URL.self) { urls, _ in
+            if let amazon = urls.first(where: AmazonExport.isExport) {
+                importAmazon(amazon)
+                return true
+            }
             let bankTypes: Set<String> = ["csv", "xlsx", "xls", "ofx", "qfx", "qbo"]
             let usable = urls.filter { $0.hasDirectoryPath || bankTypes.contains($0.pathExtension.lowercased()) }
             guard !usable.isEmpty else { return false }
@@ -180,10 +216,26 @@ struct ContentView: View {
             if selection == nil, let first = openAccounts.first { selection = .account(first.persistentModelID) }
         }
         .onChange(of: selection) {
+            // Leaving Payees ends the "came from a register" trip.
+            if selection != .payees { payeeJump = nil }
+            if selection != .purchases { purchaseJump = nil }
             if let s = SidebarMemory.encode(selection, accounts: accounts, businesses: businesses) {
                 UserDefaults.standard.set(s, forKey: SidebarMemory.key)
             }
         }
+    }
+
+    @Query(sort: \AppSettings.created) private var settingsRecords: [AppSettings]
+    private var purchasesToReview: Int {
+        let from = settingsRecords.first?.reviewFrom ?? AppSettings.defaultReviewFrom
+        return allPurchases.filter { PurchaseSettings.needsReview($0, from: from) }.count
+    }
+
+    /// Opens Purchases and imports an Amazon export dropped on the window or found among bank files.
+    private func importAmazon(_ url: URL) {
+        bankImport = nil
+        selection = .purchases
+        pendingAmazon = url
     }
 
     private func accountRow(_ a: Account) -> some View {
@@ -191,8 +243,11 @@ struct ContentView: View {
             .tag(SidebarItem.account(a.persistentModelID))
             .contextMenu {
                 Button("Edit Account…") { editingAccount = a }
+                Button("Set Balance…") { settingBalance = a }.disabled(a.isClosed)
                 Button(a.isClosed ? "Reopen Account" : "Close Account") {
                     a.isClosed.toggle()
+                    // Money refreshes a Money account's closed status on re-import; keep this choice.
+                    if a.moneyId != nil { a.closedOverride = a.isClosed }
                     try? context.save()
                 }
                 Divider()
@@ -212,10 +267,29 @@ struct ContentView: View {
         switch selection {
         case .account(let id):
             if let account = accounts.first(where: { $0.persistentModelID == id }) {
-                RegisterView(account: account, focusEntry: $focusEntry).id(id)
+                RegisterView(account: account, focusEntry: $focusEntry, open: { entryID, accountID in
+                    focusEntry = entryID
+                    selection = .account(accountID)
+                }, showPayee: { payeeID, entryID in
+                    payeeJump = PayeeJump(payee: payeeID, account: id, accountName: account.name, entry: entryID)
+                    selection = .payees
+                }, showPurchase: { purchaseID in
+                    purchaseJump = purchaseID
+                    selection = .purchases
+                })
+                .id(id)
             }
         case .payees:
-            PayeesView().id("payees")
+            PayeesView(initialPayee: payeeJump?.payee,
+                       returnTo: payeeJump.map { j in (j.accountName, {
+                           focusEntry = j.entry
+                           selection = .account(j.account)
+                       }) },
+                       open: { entryID, accountID in
+                           focusEntry = entryID
+                           selection = .account(accountID)
+                       })
+                .id("payees-\(payeeJump?.id.uuidString ?? "")")
         case .depositSources:
             PayeesView(mode: .depositSources).id("deposits")
         case .bills:
@@ -236,6 +310,12 @@ struct ContentView: View {
             }
         case .allBusinesses:
             AllBusinessesView()
+        case .purchases:
+            PurchasesView(open: { entryID, accountID in
+                focusEntry = entryID
+                selection = .account(accountID)
+            }, initialPurchase: purchaseJump, importURL: $pendingAmazon)
+            .id("purchases-\(purchaseJump?.uuidString ?? "")")
         case nil:
             if accounts.isEmpty {
                 ContentUnavailableView {
