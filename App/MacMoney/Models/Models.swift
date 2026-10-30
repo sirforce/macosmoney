@@ -50,6 +50,9 @@ final class Account {
     var openDate: Date?
     var lastReconciledDate: Date?
     var lastReconciledBalanceCents: Int?
+    /// Last statement balanced in MacMoney (app-owned; Money's own values are the two above).
+    var statementDate: Date?
+    var statementBalanceCents: Int?
     var accountNumber: String?
     var notes: String?
     var isBusiness: Bool = false

@@ -25,3 +25,6 @@ xcuserdata/
 tools/mny-export/lib/
 tools/mny-export/out/
 tools/mny-export/*.jar
+
+# Local release configuration (team ID etc.)
+tools/release/release.env

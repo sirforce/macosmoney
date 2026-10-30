@@ -30,6 +30,12 @@ xcodebuild -project MacMoney.xcodeproj -scheme MacMoney -derivedDataPath build/D
 
 Add tests with **synthetic data** (in-memory `ModelContainer`); see `BillTests` and `ScheduleCTests` for the pattern. Import tests against your own file run when you set `TEST_RUNNER_MACMONEY_EXPORT=/path/to/export.json`.
 
+## App icon and releases
+
+- The icon is drawn in code in `tools/icon/AppIcon.swift`. Run `tools/icon/make-icons.sh` after changing it to regenerate the asset catalog.
+- `tools/release/release.sh` builds a signed, notarized app and DMG and installs it. It needs your own Developer ID certificate and a `tools/release/release.env` (git-ignored; copy `release.env.example`). Never commit your team ID or credentials. See [Releasing](docs/releasing.md).
+- The version is `MARKETING_VERSION` in `App/project.yml`; release builds number themselves from the git commit count.
+
 ## Money format discoveries
 
 If you work out something new about Money's schema (investment lots, loan details, budgets, attachments…), implement it in `tools/mny-export/src/MnyExport.java`, extend the JSON, and document it in [`docs/money-file-format.md`](docs/money-file-format.md). That page is useful to everyone rescuing Money data.

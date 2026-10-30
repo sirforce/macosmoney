@@ -1,5 +1,7 @@
 # MacMoney
 
+**Version 0.9** (pre-release)
+
 A native macOS replacement for **Microsoft Money Plus Sunset Edition**. It imports your `.mny` file with its whole history and keeps the way Money works: registers, flags, bills & deposits, payee reports and forecasting. It also adds things Money never had, such as Schedule C tracking for one or more sole-proprietor businesses.
 
 Money was discontinued years ago and only runs on Windows. MacMoney lets you move to the Mac without losing twenty years of transactions. Because re-importing is safe, you can keep running both side by side until you're ready to switch.
@@ -11,7 +13,7 @@ Money was discontinued years ago and only runs on Windows. MacMoney lets you mov
 | Area | What you get |
 |---|---|
 | **Import from Money** | Reads `.mny` files from Money 2005 through Sunset Edition (read-only). Brings in accounts, categories, payees, transactions, splits, transfers, flags and recurring bills. Re-import as often as you like: Money's records update in place and anything you added in MacMoney is kept. |
-| **Registers** | One register per account with running balance, cleared/reconciled status (click to toggle), flags with a note and action date, voids, transfers and split display. View filters include Unreconciled, Flagged, Uncleared, date ranges and Upcoming. Search covers memo, payee, number and amount. Fast with 10,000+ rows. |
+| **Registers** | One register per account with running balance, cleared/reconciled status (click to toggle), flags with a note and action date, voids, transfers and split display. **Balance Account** reconciles against a statement and beeps when the difference reaches zero. View filters include Unreconciled, Flagged, Uncleared, date ranges and Upcoming. Search covers memo, payee, number and amount. Fast with 10,000+ rows. |
 | **Accounts** | Bank, credit card, investment and loan accounts. Create, edit, close (read-only) or delete them. Closed Money accounts import as read-only history. |
 | **Find** | Search every transaction in every account, with a "memo only" option and period filter. Double-click a result to jump to it in its register. |
 | **Payees & Deposit Sources** | Every payee, or only the people and companies who pay you, with use counts, this year's and all-time totals. Select one or many for a trend chart, totals by year and category, every transaction, and CSV export. Back and forward buttons move between what you've looked at. **Saved presets** recall a selection and its filters with one click. |
@@ -42,6 +44,8 @@ Or open `App/MacMoney.xcodeproj` in Xcode and press Run. The first build downloa
 
 Use the **Release** configuration for day-to-day use; it's much faster with large registers.
 
+To produce a signed, notarized app and DMG and install it in `/Applications`, use `tools/release/release.sh`. See **[Releasing](docs/releasing.md)**.
+
 ## Getting your data in
 
 1. In Money on Windows, make sure the file is saved and closed. Copy the `.mny` file to your Mac.
@@ -69,6 +73,7 @@ Nothing is sent anywhere. The app makes no network connections. The only downloa
 - [Schedule C & Businesses](docs/schedule-c.md): setting up businesses, tagging, vehicles, reports
 - [Architecture](docs/architecture.md): code layout, data model, performance design
 - [Money File Format Notes](docs/money-file-format.md): what we learned about Money's internal schema
+- [Releasing](docs/releasing.md): signing, notarizing, the DMG and the app icon
 - [Contributing](CONTRIBUTING.md)
 
 ## Project layout
@@ -81,6 +86,8 @@ App/                      SwiftUI + SwiftData macOS app (XcodeGen project in pro
   MacMoney/Views/         Screens; FastTable.swift is the NSTableView-backed list used everywhere
   MacMoneyTests/          Unit tests (import tests use your own export and skip without one)
 tools/mny-export/         Read-only Java converter: .mny → JSON (Jackcess)
+tools/icon/               The app icon, drawn in code, and the script that renders every size
+tools/release/            Release script: sign, notarize, DMG, install
 docs/                     Documentation
 ```
 
@@ -105,7 +112,6 @@ If Money itself stores a wrong reconciled balance for an account, list it so the
 
 Planned, roughly in order:
 
-- **Balance Account** (reconcile) dialog: statement date, ending balance, service charge and interest, with a beep when the difference reaches zero
 - **What-if forecast scenarios**: named, saved scenarios laid over the baseline
 - **Saved reports** with PDF export (spending by category, income vs. expense, net worth)
 - **Attachments**: receipts and statements (images, PDFs) on any transaction
@@ -119,4 +125,4 @@ Never commit real financial data. `.gitignore` excludes `*.mny`, exports, data f
 
 ## License
 
-Not yet chosen. Until a license is added, all rights are reserved by the author.
+[MIT](LICENSE) © 2026 Brent Ferree.

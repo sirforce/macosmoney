@@ -244,7 +244,7 @@ struct WelcomeView: View {
 
     var body: some View {
         VStack(spacing: 24) {
-            Image(systemName: "dollarsign.circle.fill").font(.system(size: 64)).foregroundStyle(.green)
+            Image(nsImage: AppInfo.icon).resizable().interpolation(.high).frame(width: 140, height: 140)
             Text("Welcome to MacMoney").font(.largeTitle.bold())
             Text("Bring in your data to get started.").foregroundStyle(.secondary)
             HStack(spacing: 20) {

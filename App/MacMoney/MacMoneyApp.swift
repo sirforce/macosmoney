@@ -39,6 +39,10 @@ struct MacMoneyApp: App {
                 }
                 .keyboardShortcut("f", modifiers: [.command, .shift])
             }
+            CommandMenu("Account") {
+                Button("Balance Account…") { NotificationCenter.default.post(name: .balanceAccount, object: nil) }
+                    .keyboardShortcut("r", modifiers: [.command, .shift])
+            }
         }
 
         Settings { SettingsView() }

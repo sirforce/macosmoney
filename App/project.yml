@@ -11,6 +11,8 @@ settings:
     CODE_SIGN_STYLE: Automatic
     CODE_SIGN_IDENTITY: "-"
     ENABLE_USER_SCRIPT_SANDBOXING: NO
+    MARKETING_VERSION: "0.9"
+    CURRENT_PROJECT_VERSION: "1"
 targets:
   MacMoney:
     type: application
@@ -34,11 +36,14 @@ targets:
       path: MacMoney/Info.plist
       properties:
         CFBundleDisplayName: MacMoney
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         LSApplicationCategoryType: public.app-category.finance
-        NSHumanReadableCopyright: ""
+        NSHumanReadableCopyright: "Copyright © 2026 Brent Ferree. MIT License."
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: io.github.macmoney.MacMoney
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ENABLE_HARDENED_RUNTIME: NO
         GENERATE_INFOPLIST_FILE: YES
         ENABLE_APP_SANDBOX: NO

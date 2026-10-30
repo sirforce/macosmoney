@@ -387,8 +387,77 @@ struct SettingsView: View {
     var body: some View {
         TabView {
             BackupSettingsView().tabItem { Label("Backup", systemImage: "externaldrive") }
+            AboutSettingsView().tabItem { Label("About", systemImage: "info.circle") }
         }
     }
+}
+
+enum AppInfo {
+    static var version: String { Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?" }
+    static var build: String { Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "?" }
+    static var icon: NSImage { NSApp.applicationIconImage ?? NSImage() }
+}
+
+/// Settings ▸ About: icon, version, where the data lives, license.
+struct AboutSettingsView: View {
+    @State private var showLicense = false
+
+    var body: some View {
+        VStack(spacing: 14) {
+            Image(nsImage: AppInfo.icon).resizable().interpolation(.high).frame(width: 128, height: 128)
+            VStack(spacing: 4) {
+                Text("MacMoney").font(.largeTitle.bold())
+                Text("Version \(AppInfo.version) (build \(AppInfo.build))").foregroundStyle(.secondary).textSelection(.enabled)
+                Text("A native Mac home for your Microsoft Money history.").font(.callout)
+            }
+            GroupBox {
+                Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 8) {
+                    location("Data file", Backup.storeURL)
+                    location("Backups", Backup.folder)
+                }
+                .padding(4)
+            }
+            .frame(width: 500)
+            HStack {
+                Button("License…") { showLicense = true }
+                Link("Documentation", destination: URL(string: "https://github.com/sirforce/macosmoney#readme")!)
+            }
+            VStack(spacing: 2) {
+                Text("Copyright © 2026 Brent Ferree · MIT License").font(.caption)
+                Text("Not affiliated with or endorsed by Microsoft.").font(.caption2).foregroundStyle(.secondary)
+            }
+        }
+        .padding(24)
+        .frame(width: 560)
+        .sheet(isPresented: $showLicense) {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("MIT License").font(.title3.bold())
+                ScrollView { Text(Self.license).font(.callout.monospaced()).textSelection(.enabled) }
+                HStack { Spacer(); Button("Done") { showLicense = false }.keyboardShortcut(.defaultAction) }
+            }
+            .padding(20)
+            .frame(width: 560, height: 420)
+        }
+    }
+
+    private func location(_ title: String, _ url: URL) -> some View {
+        GridRow {
+            Text(title).foregroundStyle(.secondary)
+            Text(url.path).font(.caption.monospaced()).lineLimit(1).truncationMode(.middle).textSelection(.enabled)
+            Button { NSWorkspace.shared.activateFileViewerSelecting([url]) } label: { Image(systemName: "magnifyingglass") }
+                .buttonStyle(.borderless).help("Show in Finder")
+        }
+    }
+
+    static let license = """
+    Copyright (c) 2026 Brent Ferree
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+    """
 }
 
 /// File ▸ Check Data File…

@@ -47,6 +47,7 @@ struct RegisterView: View {
     @State private var showForm = true
     @State private var pendingDelete: PersistentIdentifier?
     @State private var flagEditing: Entry?
+    @State private var balancing = false
     @Query(sort: \Business.name) private var businesses: [Business]
 
     var body: some View {
@@ -59,7 +60,8 @@ struct RegisterView: View {
         let flaggedCount = all.lazy.filter(\.row.isFlagged).count
 
         VStack(spacing: 0) {
-            header(totals: totals, shown: rows.count, total: all.count, searching: !q.isEmpty, flagged: flaggedCount)
+            header(totals: totals, shown: rows.count, total: all.count, searching: !q.isEmpty, flagged: flaggedCount,
+                   balancedThrough: all.last(where: { $0.row.status == .reconciled })?.row.date)
             Divider()
             table(rows, today: today, key: q.isEmpty ? filter.rawValue : "search")
             if showForm {
@@ -80,6 +82,11 @@ struct RegisterView: View {
                 }
                 .pickerStyle(.menu)
                 .help("Which transactions to show")
+            }
+            ToolbarItem {
+                Button { balancing = true } label: { Label("Balance Account", systemImage: "checkmark.seal") }
+                    .help("Balance this account against a statement")
+                    .disabled(account.isReadOnly)
             }
             ToolbarItem {
                 Toggle(isOn: $showForm) { Label("Transaction form", systemImage: "rectangle.bottomthird.inset.filled") }
@@ -104,6 +111,10 @@ struct RegisterView: View {
             if let id = note.object as? PersistentIdentifier, let e = context.model(for: id) as? Entry, e.account == account { flagEditing = e }
         }
         .sheet(item: $flagEditing) { FlagEditor(entry: $0) }
+        .sheet(isPresented: $balancing) { BalanceAccountView(account: account) }
+        .onReceive(NotificationCenter.default.publisher(for: .balanceAccount)) { _ in
+            if !account.isReadOnly { balancing = true }
+        }
     }
 
     private var selectedEntry: Entry? {
@@ -134,16 +145,17 @@ struct RegisterView: View {
         return parts.joined(separator: "\n\n")
     }
 
-    private func header(totals: AccountTotals, shown: Int, total: Int, searching: Bool, flagged: Int) -> some View {
+    private func header(totals: AccountTotals, shown: Int, total: Int, searching: Bool, flagged: Int, balancedThrough: Date?) -> some View {
         HStack(spacing: 28) {
             stat("Today's balance", totals.today)
             stat("Ending balance", totals.current, help: "Includes entries dated after today")
             stat("Cleared balance", totals.cleared, help: "Opening balance plus cleared and reconciled entries")
-            if let d = account.lastReconciledDate {
+            if let d = balancedThrough {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Balanced on").font(.caption).foregroundStyle(.secondary)
+                    Text("Balanced through").font(.caption).foregroundStyle(.secondary)
                     Text(Day.string(d)).font(.title3)
                 }
+                .help(lastStatementHelp)
             }
             Spacer()
             if flagged > 0 {
@@ -158,6 +170,18 @@ struct RegisterView: View {
         }
         .padding(.horizontal)
         .padding(.vertical, 10)
+    }
+
+    /// The newest reconciled transaction is shown; the statement itself goes in the tooltip.
+    private var lastStatementHelp: String {
+        var lines = ["Date of the newest reconciled transaction."]
+        if let d = account.statementDate, let b = account.statementBalanceCents {
+            lines.append("Last balanced in MacMoney: \(Day.string(d)) statement, ending \(Cents.string(b)).")
+        } else if let d = account.lastReconciledDate {
+            let bal = account.lastReconciledBalanceCents.map { ", ending \(Cents.string($0))" } ?? ""
+            lines.append("Last statement balanced in Money: \(Day.string(d))\(bal).")
+        }
+        return lines.joined(separator: "\n")
     }
 
     private func stat(_ title: String, _ cents: Int, help: String = "") -> some View {
@@ -288,6 +312,7 @@ struct DateOrder: Comparable {
 
 extension Notification.Name {
     static let editFlag = Notification.Name("editFlag")
+    static let balanceAccount = Notification.Name("balanceAccount")
 }
 
 /// Flag with its note and optional action date (Money's "Flag for follow up").

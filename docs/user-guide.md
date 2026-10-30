@@ -50,7 +50,7 @@ Select an account to open its register.
 | Category, Memo | Hover the memo to read all of it. |
 | Payment / Deposit / Balance | Running balance in date order. Negative balances are red. |
 
-**Header:** *Today's balance*, *Ending balance* (including future-dated entries), *Cleared balance*, the date Money last balanced the account, and a flagged-count button that shows just the flagged entries.
+**Header:** *Today's balance*, *Ending balance* (including future-dated entries), *Cleared balance*, **Balanced through** (the date of the newest reconciled transaction; hover it for the last statement's date and balance), and a flagged-count button that shows just the flagged entries.
 
 **View menu** (toolbar): All transactions · Unreconciled (default) · Flagged · Uncleared · Last 30 days · Last 12 months · This year · Last year · Upcoming.
 
@@ -76,6 +76,18 @@ The form at the bottom of the register (toggle it with the toolbar button) handl
 - **Flag** button: when flagged, a row appears for the flag note and an optional action date.
 - **Business row:** account default, Personal, or a specific business; Schedule C line override; business-use %; vehicle and expense type.
 - Split transactions from Money are displayed with their lines (read-only for now).
+
+### Balancing an account
+
+**Account ▸ Balance Account…** (⇧⌘R), or the ✓ seal button in the register toolbar, works like Money's Balance Account:
+
+1. **Enter the statement.** The starting balance is filled in (opening balance plus everything already reconciled). Enter the statement date and ending balance; for credit cards and loans, enter the amount owed as shown on the statement. Optionally enter a service charge and interest earned with their categories; they're added to the register as cleared transactions.
+2. **Check off what cleared.** Unreconciled transactions up to the statement date are listed (tick **Show … after statement date** to include later ones). Click the circle to mark one cleared, or select several and right-click. **Mark All** and **Unmark All** work on the list shown. The footer shows the statement ending balance, the cleared balance and the **difference**. **MacMoney beeps when the difference reaches zero.**
+3. **Finish.** Every cleared transaction becomes reconciled (**R**), and their flags clear. If it doesn't balance, Finish offers to add a *Balance Adjustment* transaction for the difference, or you can keep looking.
+
+**Postpone** keeps your marks and the statement figures; next time, the dialog offers to **Resume**.
+
+Balancing done in MacMoney survives re-import: a transaction you reconciled stays reconciled even if Money still shows it as cleared.
 
 ## Flags
 
@@ -191,6 +203,10 @@ See **[Backup & Restore](backup-and-restore.md)**. In short:
 - **New Mac:** the Welcome screen's **Restore from Backup** brings everything back. Encrypted backups ask for their backup password.
 - **File ▸ Check Data File…:** checks for damage and inconsistencies.
 
+## About MacMoney
+
+**MacMoney ▸ Settings ▸ About** shows the version and build, where your data file and backups are (with **Show in Finder** buttons), the license, and a link to this documentation.
+
 ## Keyboard shortcuts
 
 | Shortcut | Action |
@@ -198,6 +214,7 @@ See **[Backup & Restore](backup-and-restore.md)**. In short:
 | ⇧⌘I | Import from Microsoft Money |
 | ⇧⌘F | Find Transactions |
 | ⇧⌘B | Backups |
+| ⇧⌘R | Balance Account |
 | ⌘[ / ⌘] | Back / Forward (Payees, Deposit Sources) |
 | ⌘0 | Overview (Payees, Deposit Sources) |
 | ⌘, | Settings |

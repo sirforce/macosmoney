@@ -84,8 +84,12 @@ struct MoneyImporter {
             e.payee = t.payeeId.flatMap { payees[$0] }
             e.category = t.categoryId.flatMap { categories[$0] }
             e.memo = t.memo
-            e.status = ClearedStatus(rawValue: t.status) ?? .uncleared
-            e.dateCleared = Day.parse(t.dateCleared)
+            // Balancing in MacMoney is kept: a reconciled entry stays reconciled until Money catches up.
+            let moneyStatus = ClearedStatus(rawValue: t.status) ?? .uncleared
+            if e.status != .reconciled || moneyStatus == .reconciled {
+                e.status = moneyStatus
+                e.dateCleared = Day.parse(t.dateCleared)
+            }
             e.isVoid = t.isVoid
             // Money keeps flags after reconciling; here a flag lives only until the entry is reconciled.
             e.isFlagged = (t.flagged ?? false) && e.status != .reconciled

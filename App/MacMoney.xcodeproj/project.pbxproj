@@ -20,15 +20,19 @@
 		41B6976D839804B7A8EDF1C0 /* ScheduleC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99885047A8A897C6A5782C47 /* ScheduleC.swift */; };
 		4253ADC378576EC7703E8502 /* BillStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 908346A220DEFF9A0FAF9724 /* BillStore.swift */; };
 		43420DE413C02860775B9EF9 /* Forecast.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9FAD3ABB7E2DA736D7CD645 /* Forecast.swift */; };
+		50F0B8171A48F158F8B618E3 /* Reconcile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A341B17587506BC2AD96DD7 /* Reconcile.swift */; };
 		52FA8F3182C31F264BF33982 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA731FE10C24AE87B277CE7 /* Models.swift */; };
+		5E0E73F315C5B1E1BB5A303B /* BalanceAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AECFCAEFD52A40FE5AFFE5BD /* BalanceAccountView.swift */; };
 		60B635BFF5D8C7429D3B7524 /* ImportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A35A7BB8FE31DB9A1DA8571 /* ImportTests.swift */; };
 		62499F05B640B7BF5FD5D8D2 /* DataCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = F40ECDE037A460EBC41AEF9B /* DataCheck.swift */; };
 		6CAD31E86837A2B204C56CFB /* BillsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C09C50DA62FECD8CC625CFD /* BillsView.swift */; };
 		7193C6B34C401258D8441FF9 /* ForecastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6193991917F2598BFFC78ADA /* ForecastView.swift */; };
 		78A3E84D6B6DD3F8AB653476 /* EntryFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE8A710224C16BEF698D294D /* EntryFormView.swift */; };
 		817AD3B514FC725D078DECC4 /* MacMoneyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE09B62E2FB106FDE52EEE82 /* MacMoneyApp.swift */; };
+		8E1A0E76930FAD74A28E3F9A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3B18827E5C7F0F4C12AEA539 /* Assets.xcassets */; };
 		8FD5118F9D288215087D50D4 /* BillTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DCC552786B1DE850BB0B67 /* BillTests.swift */; };
 		90BA54A8030C1E0DC28DABC6 /* AccountEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67833773835F582A2AD6BE37 /* AccountEditor.swift */; };
+		9284C553972547C175FC4060 /* ReconcileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC8C2AB370A42CF87F721D16 /* ReconcileTests.swift */; };
 		9AEB1B3CC6FE04713D5BC874 /* PayeesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 166FC0D830172B603A185BCC /* PayeesView.swift */; };
 		9B76DD89599E226E218537B2 /* PresetAndCurveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96420E312929675B01E642DF /* PresetAndCurveTests.swift */; };
 		A64709289BFA3AB4F9068DCC /* BackupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501BA157234B5EA2BE108AC4 /* BackupTests.swift */; };
@@ -64,6 +68,7 @@
 		2FFA8C54D7D203126D4F2B75 /* BackupViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupViews.swift; sourceTree = "<group>"; };
 		303D27809B5A603AF544C1B8 /* BusinessView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BusinessView.swift; sourceTree = "<group>"; };
 		335098EA8D132FE68B248C00 /* TagTransactionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagTransactionsView.swift; sourceTree = "<group>"; };
+		3B18827E5C7F0F4C12AEA539 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4734E060AA67E2B126BA6488 /* Day.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Day.swift; sourceTree = "<group>"; };
 		4A35A7BB8FE31DB9A1DA8571 /* ImportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportTests.swift; sourceTree = "<group>"; };
 		501BA157234B5EA2BE108AC4 /* BackupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupTests.swift; sourceTree = "<group>"; };
@@ -78,6 +83,7 @@
 		84DCC552786B1DE850BB0B67 /* BillTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillTests.swift; sourceTree = "<group>"; };
 		8645046D4C506752C5ACFC93 /* RegisterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterView.swift; sourceTree = "<group>"; };
 		89D4D82A3EFC5A551DCB4C27 /* MacMoney.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacMoney.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8A341B17587506BC2AD96DD7 /* Reconcile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reconcile.swift; sourceTree = "<group>"; };
 		8FA731FE10C24AE87B277CE7 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		908346A220DEFF9A0FAF9724 /* BillStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillStore.swift; sourceTree = "<group>"; };
 		96420E312929675B01E642DF /* PresetAndCurveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetAndCurveTests.swift; sourceTree = "<group>"; };
@@ -86,6 +92,7 @@
 		9F870F375FAE728377D51146 /* FastTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastTable.swift; sourceTree = "<group>"; };
 		ACF5538E8E001253319DFE52 /* BusinessModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BusinessModels.swift; sourceTree = "<group>"; };
 		AE09B62E2FB106FDE52EEE82 /* MacMoneyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacMoneyApp.swift; sourceTree = "<group>"; };
+		AECFCAEFD52A40FE5AFFE5BD /* BalanceAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceAccountView.swift; sourceTree = "<group>"; };
 		B8C42B3A92A294A8800C8256 /* MacMoneyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MacMoneyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BA88E0AC8FFFD60CC8DE7D56 /* ImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportView.swift; sourceTree = "<group>"; };
 		C125501FF3AFFC2E99907350 /* MoneyExportFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoneyExportFile.swift; sourceTree = "<group>"; };
@@ -93,6 +100,7 @@
 		CA237117861ADF21D3989FB4 /* ScheduleCTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleCTests.swift; sourceTree = "<group>"; };
 		D991AB965B37449B8564460F /* FindView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindView.swift; sourceTree = "<group>"; };
 		E6CA359EF670E3EC6C60745C /* BusinessSetupViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BusinessSetupViews.swift; sourceTree = "<group>"; };
+		EC8C2AB370A42CF87F721D16 /* ReconcileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReconcileTests.swift; sourceTree = "<group>"; };
 		EE8A710224C16BEF698D294D /* EntryFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryFormView.swift; sourceTree = "<group>"; };
 		F40ECDE037A460EBC41AEF9B /* DataCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataCheck.swift; sourceTree = "<group>"; };
 		F81897E87E4D6FF68725634E /* lib */ = {isa = PBXFileReference; lastKnownFileType = folder; name = lib; path = "../tools/mny-export/lib"; sourceTree = SOURCE_ROOT; };
@@ -117,6 +125,7 @@
 				84DCC552786B1DE850BB0B67 /* BillTests.swift */,
 				4A35A7BB8FE31DB9A1DA8571 /* ImportTests.swift */,
 				96420E312929675B01E642DF /* PresetAndCurveTests.swift */,
+				EC8C2AB370A42CF87F721D16 /* ReconcileTests.swift */,
 				CA237117861ADF21D3989FB4 /* ScheduleCTests.swift */,
 			);
 			path = MacMoneyTests;
@@ -145,6 +154,7 @@
 			children = (
 				67833773835F582A2AD6BE37 /* AccountEditor.swift */,
 				2FFA8C54D7D203126D4F2B75 /* BackupViews.swift */,
+				AECFCAEFD52A40FE5AFFE5BD /* BalanceAccountView.swift */,
 				7C09C50DA62FECD8CC625CFD /* BillsView.swift */,
 				108D3C88D81CDF3ABD9E4F26 /* ContentView.swift */,
 				EE8A710224C16BEF698D294D /* EntryFormView.swift */,
@@ -179,6 +189,7 @@
 				2A5C859EBE3554FBB4CCBF3C /* EntryStore.swift */,
 				C9FAD3ABB7E2DA736D7CD645 /* Forecast.swift */,
 				539B75057124365D366BD2C6 /* LedgerIndex.swift */,
+				8A341B17587506BC2AD96DD7 /* Reconcile.swift */,
 				FEB314043D5F0DBEF672AF2C /* ReportPeriod.swift */,
 				99885047A8A897C6A5782C47 /* ScheduleC.swift */,
 			);
@@ -216,6 +227,7 @@
 		D22EB86521E3AEDA37F14E7D /* MacMoney */ = {
 			isa = PBXGroup;
 			children = (
+				3B18827E5C7F0F4C12AEA539 /* Assets.xcassets */,
 				6E9AF510678F3B294C7D52FB /* Info.plist */,
 				AE09B62E2FB106FDE52EEE82 /* MacMoneyApp.swift */,
 				03210F040E92A0D67481704B /* Import */,
@@ -317,6 +329,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8E1A0E76930FAD74A28E3F9A /* Assets.xcassets in Resources */,
 				2E70D99846EC912CAB8BDE5A /* lib in Resources */,
 				05D2DB03C0E98DCE5032D863 /* mny-export.jar in Resources */,
 			);
@@ -355,6 +368,7 @@
 				1A3C530B0037AAB197F0E973 /* Backup.swift in Sources */,
 				F9EC6674A431896EA84F9697 /* BackupCrypto.swift in Sources */,
 				39A26867233E37BF48835BAF /* BackupViews.swift in Sources */,
+				5E0E73F315C5B1E1BB5A303B /* BalanceAccountView.swift in Sources */,
 				4253ADC378576EC7703E8502 /* BillStore.swift in Sources */,
 				6CAD31E86837A2B204C56CFB /* BillsView.swift in Sources */,
 				B9E4943091DC6B608C225F10 /* BusinessModels.swift in Sources */,
@@ -376,6 +390,7 @@
 				E35D3D2E918320F68A053163 /* MoneyExportFile.swift in Sources */,
 				C34DA8775BBCB5E5A6C98519 /* MoneyImporter.swift in Sources */,
 				9AEB1B3CC6FE04713D5BC874 /* PayeesView.swift in Sources */,
+				50F0B8171A48F158F8B618E3 /* Reconcile.swift in Sources */,
 				EC8E88DD847105CF5149FD22 /* RegisterView.swift in Sources */,
 				01B790F57B09516273F20616 /* ReportPeriod.swift in Sources */,
 				41B6976D839804B7A8EDF1C0 /* ScheduleC.swift in Sources */,
@@ -392,6 +407,7 @@
 				8FD5118F9D288215087D50D4 /* BillTests.swift in Sources */,
 				60B635BFF5D8C7429D3B7524 /* ImportTests.swift in Sources */,
 				9B76DD89599E226E218537B2 /* PresetAndCurveTests.swift in Sources */,
+				9284C553972547C175FC4060 /* ReconcileTests.swift in Sources */,
 				105D3D5AD4E16570791C4DF8 /* ScheduleCTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -443,6 +459,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -462,6 +479,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 0.9;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -544,6 +562,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -557,6 +576,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 0.9;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
