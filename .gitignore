@@ -1,0 +1,27 @@
+# Personal financial data — never commit
+rea/
+*.mny
+*.mbf
+*.moneyexport.json
+*.sqlite
+*.store
+*.store-shm
+*.store-wal
+*.macmoneybackup
+*.ldb
+
+# Screenshots (they show personal data)
+Screenshot*.png
+Screen Shot*.png
+
+# macOS / Xcode
+.DS_Store
+build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+
+# Java exporter build output
+tools/mny-export/lib/
+tools/mny-export/out/
+tools/mny-export/*.jar

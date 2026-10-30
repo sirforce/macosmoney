@@ -1,0 +1,65 @@
+name: MacMoney
+options:
+  bundleIdPrefix: io.github.macmoney
+  deploymentTarget:
+    macOS: "26.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MACOSX_DEPLOYMENT_TARGET: "26.0"
+    CODE_SIGN_STYLE: Automatic
+    CODE_SIGN_IDENTITY: "-"
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+targets:
+  MacMoney:
+    type: application
+    platform: macOS
+    sources:
+      - path: MacMoney
+      # Money -> JSON converter, bundled into Resources/ (jar + lib/ side by side).
+      - path: ../tools/mny-export/mny-export.jar
+        buildPhase: resources
+      - path: ../tools/mny-export/lib
+        type: folder
+        buildPhase: resources
+    preBuildScripts:
+      - name: Build mny-export
+        script: |
+          if [ ! -f "${SRCROOT}/../tools/mny-export/mny-export.jar" ] || [ "${SRCROOT}/../tools/mny-export/src/MnyExport.java" -nt "${SRCROOT}/../tools/mny-export/mny-export.jar" ]; then
+            "${SRCROOT}/../tools/mny-export/build.sh"
+          fi
+        basedOnDependencyAnalysis: false
+    info:
+      path: MacMoney/Info.plist
+      properties:
+        CFBundleDisplayName: MacMoney
+        LSApplicationCategoryType: public.app-category.finance
+        NSHumanReadableCopyright: ""
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.macmoney.MacMoney
+        ENABLE_HARDENED_RUNTIME: NO
+        GENERATE_INFOPLIST_FILE: YES
+        ENABLE_APP_SANDBOX: NO
+  MacMoneyTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: MacMoneyTests
+    dependencies:
+      - target: MacMoney
+    settings:
+      base:
+        BUNDLE_LOADER: "$(TEST_HOST)"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/MacMoney.app/Contents/MacOS/MacMoney"
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  MacMoney:
+    build:
+      targets:
+        MacMoney: all
+        MacMoneyTests: [test]
+    test:
+      targets:
+        - MacMoneyTests

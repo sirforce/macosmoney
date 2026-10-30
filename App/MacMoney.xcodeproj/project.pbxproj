@@ -1,0 +1,630 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		01B790F57B09516273F20616 /* ReportPeriod.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEB314043D5F0DBEF672AF2C /* ReportPeriod.swift */; };
+		05D2DB03C0E98DCE5032D863 /* mny-export.jar in Resources */ = {isa = PBXBuildFile; fileRef = 6A2DBA951F998D806DE385BC /* mny-export.jar */; };
+		0EFD1509CC3A4FE97F3FB781 /* Day.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4734E060AA67E2B126BA6488 /* Day.swift */; };
+		105D3D5AD4E16570791C4DF8 /* ScheduleCTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA237117861ADF21D3989FB4 /* ScheduleCTests.swift */; };
+		11AEA7E03552EA06AE208C2F /* TagTransactionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335098EA8D132FE68B248C00 /* TagTransactionsView.swift */; };
+		1A3C530B0037AAB197F0E973 /* Backup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62A07F448FE22C74E3F186CE /* Backup.swift */; };
+		207C551BDEE4F7234661A732 /* FastTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F870F375FAE728377D51146 /* FastTable.swift */; };
+		269A3DDF1A7973E3071511DC /* FindView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D991AB965B37449B8564460F /* FindView.swift */; };
+		2E70D99846EC912CAB8BDE5A /* lib in Resources */ = {isa = PBXBuildFile; fileRef = F81897E87E4D6FF68725634E /* lib */; };
+		39A26867233E37BF48835BAF /* BackupViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FFA8C54D7D203126D4F2B75 /* BackupViews.swift */; };
+		41B6976D839804B7A8EDF1C0 /* ScheduleC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99885047A8A897C6A5782C47 /* ScheduleC.swift */; };
+		4253ADC378576EC7703E8502 /* BillStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 908346A220DEFF9A0FAF9724 /* BillStore.swift */; };
+		43420DE413C02860775B9EF9 /* Forecast.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9FAD3ABB7E2DA736D7CD645 /* Forecast.swift */; };
+		52FA8F3182C31F264BF33982 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA731FE10C24AE87B277CE7 /* Models.swift */; };
+		60B635BFF5D8C7429D3B7524 /* ImportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A35A7BB8FE31DB9A1DA8571 /* ImportTests.swift */; };
+		62499F05B640B7BF5FD5D8D2 /* DataCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = F40ECDE037A460EBC41AEF9B /* DataCheck.swift */; };
+		6CAD31E86837A2B204C56CFB /* BillsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C09C50DA62FECD8CC625CFD /* BillsView.swift */; };
+		7193C6B34C401258D8441FF9 /* ForecastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6193991917F2598BFFC78ADA /* ForecastView.swift */; };
+		78A3E84D6B6DD3F8AB653476 /* EntryFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE8A710224C16BEF698D294D /* EntryFormView.swift */; };
+		817AD3B514FC725D078DECC4 /* MacMoneyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE09B62E2FB106FDE52EEE82 /* MacMoneyApp.swift */; };
+		8FD5118F9D288215087D50D4 /* BillTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DCC552786B1DE850BB0B67 /* BillTests.swift */; };
+		90BA54A8030C1E0DC28DABC6 /* AccountEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67833773835F582A2AD6BE37 /* AccountEditor.swift */; };
+		9AEB1B3CC6FE04713D5BC874 /* PayeesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 166FC0D830172B603A185BCC /* PayeesView.swift */; };
+		9B76DD89599E226E218537B2 /* PresetAndCurveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96420E312929675B01E642DF /* PresetAndCurveTests.swift */; };
+		A64709289BFA3AB4F9068DCC /* BackupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501BA157234B5EA2BE108AC4 /* BackupTests.swift */; };
+		B9E4943091DC6B608C225F10 /* BusinessModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACF5538E8E001253319DFE52 /* BusinessModels.swift */; };
+		C34DA8775BBCB5E5A6C98519 /* MoneyImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0430C220C45DD3218C855E54 /* MoneyImporter.swift */; };
+		E33C51A42C843232B4CAAFD9 /* EntryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A5C859EBE3554FBB4CCBF3C /* EntryStore.swift */; };
+		E35D3D2E918320F68A053163 /* MoneyExportFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = C125501FF3AFFC2E99907350 /* MoneyExportFile.swift */; };
+		E36D69F585B34FDE495C2EB6 /* BusinessSetupViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6CA359EF670E3EC6C60745C /* BusinessSetupViews.swift */; };
+		EC8E88DD847105CF5149FD22 /* RegisterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8645046D4C506752C5ACFC93 /* RegisterView.swift */; };
+		EEE686B6F584F544F767D1DA /* BusinessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 303D27809B5A603AF544C1B8 /* BusinessView.swift */; };
+		F2F5582793834DE1E5CE2822 /* LedgerIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 539B75057124365D366BD2C6 /* LedgerIndex.swift */; };
+		F579143FBEB686EB07334FB1 /* ImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA88E0AC8FFFD60CC8DE7D56 /* ImportView.swift */; };
+		FB72153D190E24C0CE5279EB /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 108D3C88D81CDF3ABD9E4F26 /* ContentView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		8C29C5DB7E8A3B4D575C1D74 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8C7FBCFE486A776A9EA9F7A3 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3468892C95070A5BF99E5484;
+			remoteInfo = MacMoney;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0430C220C45DD3218C855E54 /* MoneyImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoneyImporter.swift; sourceTree = "<group>"; };
+		108D3C88D81CDF3ABD9E4F26 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		166FC0D830172B603A185BCC /* PayeesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PayeesView.swift; sourceTree = "<group>"; };
+		2A5C859EBE3554FBB4CCBF3C /* EntryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryStore.swift; sourceTree = "<group>"; };
+		2FFA8C54D7D203126D4F2B75 /* BackupViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupViews.swift; sourceTree = "<group>"; };
+		303D27809B5A603AF544C1B8 /* BusinessView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BusinessView.swift; sourceTree = "<group>"; };
+		335098EA8D132FE68B248C00 /* TagTransactionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagTransactionsView.swift; sourceTree = "<group>"; };
+		4734E060AA67E2B126BA6488 /* Day.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Day.swift; sourceTree = "<group>"; };
+		4A35A7BB8FE31DB9A1DA8571 /* ImportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportTests.swift; sourceTree = "<group>"; };
+		501BA157234B5EA2BE108AC4 /* BackupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupTests.swift; sourceTree = "<group>"; };
+		539B75057124365D366BD2C6 /* LedgerIndex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LedgerIndex.swift; sourceTree = "<group>"; };
+		6193991917F2598BFFC78ADA /* ForecastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastView.swift; sourceTree = "<group>"; };
+		62A07F448FE22C74E3F186CE /* Backup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Backup.swift; sourceTree = "<group>"; };
+		67833773835F582A2AD6BE37 /* AccountEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountEditor.swift; sourceTree = "<group>"; };
+		6A2DBA951F998D806DE385BC /* mny-export.jar */ = {isa = PBXFileReference; lastKnownFileType = archive.jar; path = "mny-export.jar"; sourceTree = "<group>"; };
+		6E9AF510678F3B294C7D52FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		7C09C50DA62FECD8CC625CFD /* BillsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillsView.swift; sourceTree = "<group>"; };
+		84DCC552786B1DE850BB0B67 /* BillTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillTests.swift; sourceTree = "<group>"; };
+		8645046D4C506752C5ACFC93 /* RegisterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterView.swift; sourceTree = "<group>"; };
+		89D4D82A3EFC5A551DCB4C27 /* MacMoney.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacMoney.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8FA731FE10C24AE87B277CE7 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		908346A220DEFF9A0FAF9724 /* BillStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillStore.swift; sourceTree = "<group>"; };
+		96420E312929675B01E642DF /* PresetAndCurveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetAndCurveTests.swift; sourceTree = "<group>"; };
+		99885047A8A897C6A5782C47 /* ScheduleC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleC.swift; sourceTree = "<group>"; };
+		9F870F375FAE728377D51146 /* FastTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastTable.swift; sourceTree = "<group>"; };
+		ACF5538E8E001253319DFE52 /* BusinessModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BusinessModels.swift; sourceTree = "<group>"; };
+		AE09B62E2FB106FDE52EEE82 /* MacMoneyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacMoneyApp.swift; sourceTree = "<group>"; };
+		B8C42B3A92A294A8800C8256 /* MacMoneyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MacMoneyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		BA88E0AC8FFFD60CC8DE7D56 /* ImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportView.swift; sourceTree = "<group>"; };
+		C125501FF3AFFC2E99907350 /* MoneyExportFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoneyExportFile.swift; sourceTree = "<group>"; };
+		C9FAD3ABB7E2DA736D7CD645 /* Forecast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Forecast.swift; sourceTree = "<group>"; };
+		CA237117861ADF21D3989FB4 /* ScheduleCTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleCTests.swift; sourceTree = "<group>"; };
+		D991AB965B37449B8564460F /* FindView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindView.swift; sourceTree = "<group>"; };
+		E6CA359EF670E3EC6C60745C /* BusinessSetupViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BusinessSetupViews.swift; sourceTree = "<group>"; };
+		EE8A710224C16BEF698D294D /* EntryFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryFormView.swift; sourceTree = "<group>"; };
+		F40ECDE037A460EBC41AEF9B /* DataCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataCheck.swift; sourceTree = "<group>"; };
+		F81897E87E4D6FF68725634E /* lib */ = {isa = PBXFileReference; lastKnownFileType = folder; name = lib; path = "../tools/mny-export/lib"; sourceTree = SOURCE_ROOT; };
+		FEB314043D5F0DBEF672AF2C /* ReportPeriod.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportPeriod.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		03210F040E92A0D67481704B /* Import */ = {
+			isa = PBXGroup;
+			children = (
+				C125501FF3AFFC2E99907350 /* MoneyExportFile.swift */,
+				0430C220C45DD3218C855E54 /* MoneyImporter.swift */,
+			);
+			path = Import;
+			sourceTree = "<group>";
+		};
+		04E4723739525F01DF80A98D /* MacMoneyTests */ = {
+			isa = PBXGroup;
+			children = (
+				501BA157234B5EA2BE108AC4 /* BackupTests.swift */,
+				84DCC552786B1DE850BB0B67 /* BillTests.swift */,
+				4A35A7BB8FE31DB9A1DA8571 /* ImportTests.swift */,
+				96420E312929675B01E642DF /* PresetAndCurveTests.swift */,
+				CA237117861ADF21D3989FB4 /* ScheduleCTests.swift */,
+			);
+			path = MacMoneyTests;
+			sourceTree = "<group>";
+		};
+		244719F31CFDC206E31643E6 /* Business */ = {
+			isa = PBXGroup;
+			children = (
+				E6CA359EF670E3EC6C60745C /* BusinessSetupViews.swift */,
+				303D27809B5A603AF544C1B8 /* BusinessView.swift */,
+				335098EA8D132FE68B248C00 /* TagTransactionsView.swift */,
+			);
+			path = Business;
+			sourceTree = "<group>";
+		};
+		2F95F107F90F71E655ED0800 /* tools */ = {
+			isa = PBXGroup;
+			children = (
+				EC4EE85A430B364EABE1DE3A /* mny-export */,
+			);
+			path = tools;
+			sourceTree = "<group>";
+		};
+		677CC3F7FC420923901CCE3B /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				67833773835F582A2AD6BE37 /* AccountEditor.swift */,
+				2FFA8C54D7D203126D4F2B75 /* BackupViews.swift */,
+				7C09C50DA62FECD8CC625CFD /* BillsView.swift */,
+				108D3C88D81CDF3ABD9E4F26 /* ContentView.swift */,
+				EE8A710224C16BEF698D294D /* EntryFormView.swift */,
+				9F870F375FAE728377D51146 /* FastTable.swift */,
+				D991AB965B37449B8564460F /* FindView.swift */,
+				6193991917F2598BFFC78ADA /* ForecastView.swift */,
+				BA88E0AC8FFFD60CC8DE7D56 /* ImportView.swift */,
+				166FC0D830172B603A185BCC /* PayeesView.swift */,
+				8645046D4C506752C5ACFC93 /* RegisterView.swift */,
+				244719F31CFDC206E31643E6 /* Business */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		6A40248F66EC8D12B22263CD /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				89D4D82A3EFC5A551DCB4C27 /* MacMoney.app */,
+				B8C42B3A92A294A8800C8256 /* MacMoneyTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		77A3CF7F5EB64FB7DE07D43F /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				62A07F448FE22C74E3F186CE /* Backup.swift */,
+				908346A220DEFF9A0FAF9724 /* BillStore.swift */,
+				F40ECDE037A460EBC41AEF9B /* DataCheck.swift */,
+				4734E060AA67E2B126BA6488 /* Day.swift */,
+				2A5C859EBE3554FBB4CCBF3C /* EntryStore.swift */,
+				C9FAD3ABB7E2DA736D7CD645 /* Forecast.swift */,
+				539B75057124365D366BD2C6 /* LedgerIndex.swift */,
+				FEB314043D5F0DBEF672AF2C /* ReportPeriod.swift */,
+				99885047A8A897C6A5782C47 /* ScheduleC.swift */,
+			);
+			path = Support;
+			sourceTree = "<group>";
+		};
+		B58FBF3FE6961BF052D20CAC /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				ACF5538E8E001253319DFE52 /* BusinessModels.swift */,
+				8FA731FE10C24AE87B277CE7 /* Models.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		C3998503CE7954EA18D2D96E /* macosmoney */ = {
+			isa = PBXGroup;
+			children = (
+				2F95F107F90F71E655ED0800 /* tools */,
+			);
+			name = macosmoney;
+			path = ..;
+			sourceTree = "<group>";
+		};
+		CC5E42FDBED5EA47ADD19039 = {
+			isa = PBXGroup;
+			children = (
+				D22EB86521E3AEDA37F14E7D /* MacMoney */,
+				04E4723739525F01DF80A98D /* MacMoneyTests */,
+				C3998503CE7954EA18D2D96E /* macosmoney */,
+				6A40248F66EC8D12B22263CD /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D22EB86521E3AEDA37F14E7D /* MacMoney */ = {
+			isa = PBXGroup;
+			children = (
+				6E9AF510678F3B294C7D52FB /* Info.plist */,
+				AE09B62E2FB106FDE52EEE82 /* MacMoneyApp.swift */,
+				03210F040E92A0D67481704B /* Import */,
+				B58FBF3FE6961BF052D20CAC /* Models */,
+				77A3CF7F5EB64FB7DE07D43F /* Support */,
+				677CC3F7FC420923901CCE3B /* Views */,
+			);
+			path = MacMoney;
+			sourceTree = "<group>";
+		};
+		EC4EE85A430B364EABE1DE3A /* mny-export */ = {
+			isa = PBXGroup;
+			children = (
+				F81897E87E4D6FF68725634E /* lib */,
+				6A2DBA951F998D806DE385BC /* mny-export.jar */,
+			);
+			path = "mny-export";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		2EAF2D3FCC1BE0274A7E6AA6 /* MacMoneyTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 85D3B7EF5D634C9FC46AD0B7 /* Build configuration list for PBXNativeTarget "MacMoneyTests" */;
+			buildPhases = (
+				EFB408EE5B9F8370A0CD5308 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E8C296E0C4C2068D9528782C /* PBXTargetDependency */,
+			);
+			name = MacMoneyTests;
+			packageProductDependencies = (
+			);
+			productName = MacMoneyTests;
+			productReference = B8C42B3A92A294A8800C8256 /* MacMoneyTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		3468892C95070A5BF99E5484 /* MacMoney */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3943D900AD6B85E6BB40397F /* Build configuration list for PBXNativeTarget "MacMoney" */;
+			buildPhases = (
+				894C97A3CDC78D30ED34742F /* Build mny-export */,
+				A28C602D36A2BCFA1848E430 /* Sources */,
+				C19B19E7E7D800092836A7FA /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MacMoney;
+			packageProductDependencies = (
+			);
+			productName = MacMoney;
+			productReference = 89D4D82A3EFC5A551DCB4C27 /* MacMoney.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		8C7FBCFE486A776A9EA9F7A3 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					2EAF2D3FCC1BE0274A7E6AA6 = {
+						ProvisioningStyle = Automatic;
+					};
+					3468892C95070A5BF99E5484 = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 0274430DDDC116A0E253A281 /* Build configuration list for PBXProject "MacMoney" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = CC5E42FDBED5EA47ADD19039;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 6A40248F66EC8D12B22263CD /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				3468892C95070A5BF99E5484 /* MacMoney */,
+				2EAF2D3FCC1BE0274A7E6AA6 /* MacMoneyTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		C19B19E7E7D800092836A7FA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2E70D99846EC912CAB8BDE5A /* lib in Resources */,
+				05D2DB03C0E98DCE5032D863 /* mny-export.jar in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		894C97A3CDC78D30ED34742F /* Build mny-export */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Build mny-export";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ ! -f \"${SRCROOT}/../tools/mny-export/mny-export.jar\" ] || [ \"${SRCROOT}/../tools/mny-export/src/MnyExport.java\" -nt \"${SRCROOT}/../tools/mny-export/mny-export.jar\" ]; then\n  \"${SRCROOT}/../tools/mny-export/build.sh\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A28C602D36A2BCFA1848E430 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				90BA54A8030C1E0DC28DABC6 /* AccountEditor.swift in Sources */,
+				1A3C530B0037AAB197F0E973 /* Backup.swift in Sources */,
+				39A26867233E37BF48835BAF /* BackupViews.swift in Sources */,
+				4253ADC378576EC7703E8502 /* BillStore.swift in Sources */,
+				6CAD31E86837A2B204C56CFB /* BillsView.swift in Sources */,
+				B9E4943091DC6B608C225F10 /* BusinessModels.swift in Sources */,
+				E36D69F585B34FDE495C2EB6 /* BusinessSetupViews.swift in Sources */,
+				EEE686B6F584F544F767D1DA /* BusinessView.swift in Sources */,
+				FB72153D190E24C0CE5279EB /* ContentView.swift in Sources */,
+				62499F05B640B7BF5FD5D8D2 /* DataCheck.swift in Sources */,
+				0EFD1509CC3A4FE97F3FB781 /* Day.swift in Sources */,
+				78A3E84D6B6DD3F8AB653476 /* EntryFormView.swift in Sources */,
+				E33C51A42C843232B4CAAFD9 /* EntryStore.swift in Sources */,
+				207C551BDEE4F7234661A732 /* FastTable.swift in Sources */,
+				269A3DDF1A7973E3071511DC /* FindView.swift in Sources */,
+				43420DE413C02860775B9EF9 /* Forecast.swift in Sources */,
+				7193C6B34C401258D8441FF9 /* ForecastView.swift in Sources */,
+				F579143FBEB686EB07334FB1 /* ImportView.swift in Sources */,
+				F2F5582793834DE1E5CE2822 /* LedgerIndex.swift in Sources */,
+				817AD3B514FC725D078DECC4 /* MacMoneyApp.swift in Sources */,
+				52FA8F3182C31F264BF33982 /* Models.swift in Sources */,
+				E35D3D2E918320F68A053163 /* MoneyExportFile.swift in Sources */,
+				C34DA8775BBCB5E5A6C98519 /* MoneyImporter.swift in Sources */,
+				9AEB1B3CC6FE04713D5BC874 /* PayeesView.swift in Sources */,
+				EC8E88DD847105CF5149FD22 /* RegisterView.swift in Sources */,
+				01B790F57B09516273F20616 /* ReportPeriod.swift in Sources */,
+				41B6976D839804B7A8EDF1C0 /* ScheduleC.swift in Sources */,
+				11AEA7E03552EA06AE208C2F /* TagTransactionsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EFB408EE5B9F8370A0CD5308 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A64709289BFA3AB4F9068DCC /* BackupTests.swift in Sources */,
+				8FD5118F9D288215087D50D4 /* BillTests.swift in Sources */,
+				60B635BFF5D8C7429D3B7524 /* ImportTests.swift in Sources */,
+				9B76DD89599E226E218537B2 /* PresetAndCurveTests.swift in Sources */,
+				105D3D5AD4E16570791C4DF8 /* ScheduleCTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		E8C296E0C4C2068D9528782C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3468892C95070A5BF99E5484 /* MacMoney */;
+			targetProxy = 8C29C5DB7E8A3B4D575C1D74 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		17AB085426C740B2B508066A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		2F929479B0B9EC5AD08C987F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.macmoney.MacMoneyTests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MacMoney.app/Contents/MacOS/MacMoney";
+			};
+			name = Release;
+		};
+		3E5B384F98949AD65B567CB2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MacMoney/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.macmoney.MacMoney;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		9A18C398AE168AB4D294884A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		B46DFE56D1C57626EFCF256F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.macmoney.MacMoneyTests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MacMoney.app/Contents/MacOS/MacMoney";
+			};
+			name = Debug;
+		};
+		CE05CFB2199AA1BB4CF5EF92 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MacMoney/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.macmoney.MacMoney;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0274430DDDC116A0E253A281 /* Build configuration list for PBXProject "MacMoney" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				17AB085426C740B2B508066A /* Debug */,
+				9A18C398AE168AB4D294884A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		3943D900AD6B85E6BB40397F /* Build configuration list for PBXNativeTarget "MacMoney" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CE05CFB2199AA1BB4CF5EF92 /* Debug */,
+				3E5B384F98949AD65B567CB2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		85D3B7EF5D634C9FC46AD0B7 /* Build configuration list for PBXNativeTarget "MacMoneyTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B46DFE56D1C57626EFCF256F /* Debug */,
+				2F929479B0B9EC5AD08C987F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 8C7FBCFE486A776A9EA9F7A3 /* Project object */;
+}
