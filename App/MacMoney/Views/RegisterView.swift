@@ -61,6 +61,10 @@ struct RegisterView: View {
     @State private var balancing = false
     @State private var settingBalance = false
     @State private var itemizing: PurchaseEditRequest?
+    /// Form field to jump into after double-clicking a register cell.
+    @State private var formFocus: EntryFormView.Field?
+    /// The last single-click on the C column, so a double-click there can take it back.
+    @State private var lastToggle: (id: PersistentIdentifier, status: ClearedStatus, dateCleared: Date?, at: Date)?
     /// Set while jumping to an entry, so the temporary "All transactions" isn't remembered.
     @State private var jumping = false
     @Query(sort: \Business.name) private var businesses: [Business]
@@ -85,7 +89,7 @@ struct RegisterView: View {
             }
             if showForm && !(searchScope == .all && !q.isEmpty) {
                 Divider()
-                EntryFormView(account: account, entry: selectedEntry) { saved in
+                EntryFormView(account: account, entry: selectedEntry, focusRequest: $formFocus) { saved in
                     selection = saved?.persistentModelID
                 }
                 .id(selection)
@@ -319,6 +323,7 @@ struct RegisterView: View {
                          selection: Binding(get: { selection.map { [$0] } ?? [] }, set: { selection = $0.first }),
                          multipleSelection: false, autosave: "Register", scrollToEnd: true, scrollKey: key,
                          menu: { ids in ids.first.map { readOnly ? payeeItems($0) : payeeItems($0) + menuItems($0) } ?? [] },
+                         onCellDoubleClick: { r, column in editInForm(r.id, column: column) },
                          onDelete: { ids in if !readOnly, let id = ids.first { pendingDelete = id } })
     }
 
@@ -332,10 +337,39 @@ struct RegisterView: View {
 
     private func toggleFlag(_ id: PersistentIdentifier) { change(id) { $0.isFlagged.toggle() } }
 
+    /// Double-clicking a cell selects the entry and puts the keyboard in the matching form field.
+    private func editInForm(_ id: PersistentIdentifier, column: String) -> Bool {
+        let field: EntryFormView.Field? = switch column {
+        case "Payee": .payee
+        case "Date": .date
+        case "Category": .category
+        case "Num": .number
+        case "Memo": .memo
+        case "Payment", "Deposit": .amount
+        case "status": .status
+        default: nil
+        }
+        guard let field, !account.isReadOnly else { return false }
+        if field == .status { undoClickToggle(id) }
+        selection = id
+        showForm = true
+        formFocus = field
+        return true
+    }
+
+    /// The first click of a double-click on the C column toggled cleared; put it back.
+    private func undoClickToggle(_ id: PersistentIdentifier) {
+        defer { lastToggle = nil }
+        guard let t = lastToggle, t.id == id, Date().timeIntervalSince(t.at) <= NSEvent.doubleClickInterval + 0.2 else { return }
+        change(id) { $0.status = t.status; $0.dateCleared = t.dateCleared }
+    }
+
     /// Clicking toggles uncleared <-> cleared. Reconciled entries change only via the context menu.
     private func toggleCleared(_ id: PersistentIdentifier, _ status: ClearedStatus) {
+        lastToggle = nil
         guard status != .reconciled else { return }
         change(id) { e in
+            lastToggle = (id, e.status, e.dateCleared, Date())
             e.status = status == .cleared ? .uncleared : .cleared
             e.dateCleared = e.status == .cleared ? Day.today : nil
         }

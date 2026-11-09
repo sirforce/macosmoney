@@ -21,6 +21,9 @@ struct FastTable<Row: Identifiable>: NSViewRepresentable where Row.ID: Hashable 
     var scrollKey: AnyHashable?
     var menu: ((Set<Row.ID>) -> [FastMenuItem])?
     var onDoubleClick: ((Row) -> Void)?
+    /// A double-click with the id of the column it landed in; return true if handled (then
+    /// `onDoubleClick` isn't called). Lets a register jump to the matching field in its form.
+    var onCellDoubleClick: ((Row, String) -> Bool)?
     var onDelete: ((Set<Row.ID>) -> Void)?
     /// A plain key (no ⌘/⌃/⌥) pressed with rows selected; return true if handled. Lets lists offer
     /// one-key actions such as B for business.
@@ -218,7 +221,10 @@ struct FastTable<Row: Identifiable>: NSViewRepresentable where Row.ID: Hashable 
         @objc func doubleClicked(_ sender: NSTableView) {
             let r = sender.clickedRow
             guard r >= 0, r < display.count else { return }
-            if sender.clickedColumn >= 0, columnsByID[sender.tableColumns[sender.clickedColumn].identifier.rawValue]?.onClick != nil { return }
+            let c = sender.clickedColumn
+            let column = c >= 0 && c < sender.tableColumns.count ? sender.tableColumns[c].identifier.rawValue : nil
+            if let column, parent.onCellDoubleClick?(display[r], column) == true { return }
+            if let column, columnsByID[column]?.onClick != nil { return }
             parent.onDoubleClick?(display[r])
         }
 

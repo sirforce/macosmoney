@@ -12,13 +12,15 @@ struct EntryFormView: View {
 
     let account: Account
     let entry: Entry?
+    /// A field to jump into (set by double-clicking a register cell); cleared once taken.
+    var focusRequest: Binding<Field?> = .constant(nil)
     var onSaved: (Entry?) -> Void
 
     @State private var draft = EntryDraft()
     @State private var error: String?
     @FocusState private var focus: Field?
 
-    private enum Field { case payee, amount }
+    enum Field { case payee, date, category, number, memo, amount, status }
 
     private var readOnly: Bool { account.isReadOnly }
 
@@ -50,6 +52,7 @@ struct EntryFormView: View {
                         .onSubmit { fillFromLastUse() }
                     Text("Date:").gridColumnAlignment(.trailing)
                     DatePicker("", selection: dateBinding, displayedComponents: .date).labelsHidden()
+                        .focused($focus, equals: .date)
                 }
                 GridRow {
                     if draft.kind == .transfer {
@@ -66,6 +69,7 @@ struct EntryFormView: View {
                             }
                         }
                         .labelsHidden()
+                        .focused($focus, equals: .category)
                     } else {
                         Text("Category:")
                         if entry?.isSplit == true {
@@ -73,15 +77,18 @@ struct EntryFormView: View {
                         } else {
                             TextField("Category", text: $draft.categoryName)
                                 .textInputSuggestions { suggestions(index.categoryNames, matching: draft.categoryName) }
+                                .focused($focus, equals: .category)
                         }
                     }
                     Text("Number:")
                     TextField("Num", text: $draft.number).frame(width: 140)
+                        .focused($focus, equals: .number)
                 }
                 GridRow {
                     Text("Memo:")
                     TextField("Memo", text: $draft.memo, axis: .vertical)
                         .lineLimit(1...4)
+                        .focused($focus, equals: .memo)
                     Text("Amount:")
                     TextField("0.00", text: $draft.amount)
                         .monospacedDigit()
@@ -96,6 +103,10 @@ struct EntryFormView: View {
                     }
                     .pickerStyle(.segmented)
                     .frame(width: 300)
+                    .focusable()
+                    .focused($focus, equals: .status)
+                    .onKeyPress(action: statusKey)
+                    .help("When selected: U, C or R, or ← →, to change")
                     Color.clear.gridCellUnsizedAxes([.horizontal, .vertical])
                     HStack {
                         Toggle(isOn: $draft.isFlagged) { Label("Flag", systemImage: draft.isFlagged ? "flag.fill" : "flag") }
@@ -142,7 +153,37 @@ struct EntryFormView: View {
         .disabled(readOnly)
         .padding()
         .background(.background.secondary)
-        .onAppear(perform: load)
+        .onAppear {
+            load()
+            takeFocusRequest()
+        }
+        .onChange(of: focusRequest.wrappedValue) { takeFocusRequest() }
+    }
+
+    private func takeFocusRequest() {
+        guard let field = focusRequest.wrappedValue else { return }
+        focusRequest.wrappedValue = nil
+        guard !readOnly else { return }
+        // Wait a turn so the register's double-click finishes before the field takes the keyboard.
+        DispatchQueue.main.async { focus = field }
+    }
+
+    /// Keyboard for the status control: U / C / R pick directly, arrows step through.
+    private func statusKey(_ press: KeyPress) -> KeyPress.Result {
+        let all = ClearedStatus.allCases
+        let i = all.firstIndex(of: draft.status) ?? 0
+        switch press.key {
+        case .leftArrow: draft.status = all[max(0, i - 1)]; return .handled
+        case .rightArrow: draft.status = all[min(all.count - 1, i + 1)]; return .handled
+        default: break
+        }
+        switch press.characters.lowercased() {
+        case "u": draft.status = .uncleared
+        case "c": draft.status = .cleared
+        case "r": draft.status = .reconciled
+        default: return .ignored
+        }
+        return .handled
     }
 
     /// Business tagging: which business (or personal), Schedule C line, business-use %, vehicle.
