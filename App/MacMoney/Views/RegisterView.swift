@@ -40,6 +40,7 @@ enum SearchScope: String { case account, all }
 struct RegisterView: View {
     @Environment(\.modelContext) private var context
     @Environment(LedgerIndex.self) private var index
+    @Environment(\.undoManager) private var undoManager
     let account: Account
     @Binding var focusEntry: PersistentIdentifier?
     /// Opens an entry in its own register (for results from other accounts).
@@ -124,7 +125,10 @@ struct RegisterView: View {
         .confirmationDialog("Delete this transaction?", isPresented: Binding(get: { pendingDelete != nil }, set: { if !$0 { pendingDelete = nil } }),
                             presenting: pendingDelete) { id in
             Button("Delete", role: .destructive) {
-                if let e = context.model(for: id) as? Entry { EntryStore(context: context).delete(e) }
+                if let e = context.model(for: id) as? Entry {
+                    EntryUndo.record("Delete Transaction", context: context, undoManager: undoManager, touching: [e],
+                                     change: { EntryStore(context: context).delete(e) }, result: { [] })
+                }
                 if selection == id { selection = nil }
             }
         } message: { id in
@@ -329,13 +333,12 @@ struct RegisterView: View {
 
     private func entry(_ id: PersistentIdentifier) -> Entry? { context.model(for: id) as? Entry }
 
-    private func change(_ id: PersistentIdentifier, _ body: (Entry) -> Void) {
+    private func change(_ id: PersistentIdentifier, _ actionName: String = "Change Transaction", _ body: (Entry) -> Void) {
         guard !account.isReadOnly, let e = entry(id) else { return }
-        body(e)
-        try? context.save()
+        EntryUndo.change(actionName, e, context: context, undoManager: undoManager, body)
     }
 
-    private func toggleFlag(_ id: PersistentIdentifier) { change(id) { $0.isFlagged.toggle() } }
+    private func toggleFlag(_ id: PersistentIdentifier) { change(id, "Flag") { $0.isFlagged.toggle() } }
 
     /// Double-clicking a cell selects the entry and puts the keyboard in the matching form field.
     private func editInForm(_ id: PersistentIdentifier, column: String) -> Bool {
@@ -361,6 +364,11 @@ struct RegisterView: View {
     private func undoClickToggle(_ id: PersistentIdentifier) {
         defer { lastToggle = nil }
         guard let t = lastToggle, t.id == id, Date().timeIntervalSince(t.at) <= NSEvent.doubleClickInterval + 0.2 else { return }
+        // Take the click back off the undo stack rather than adding a second change on top of it.
+        if let undoManager, undoManager.canUndo, undoManager.groupingLevel == 0, undoManager.undoActionName == "Mark Cleared" {
+            undoManager.undo()
+            return
+        }
         change(id) { $0.status = t.status; $0.dateCleared = t.dateCleared }
     }
 
@@ -368,7 +376,7 @@ struct RegisterView: View {
     private func toggleCleared(_ id: PersistentIdentifier, _ status: ClearedStatus) {
         lastToggle = nil
         guard status != .reconciled else { return }
-        change(id) { e in
+        change(id, "Mark Cleared") { e in
             lastToggle = (id, e.status, e.dateCleared, Date())
             e.status = status == .cleared ? .uncleared : .cleared
             e.dateCleared = e.status == .cleared ? Day.today : nil
@@ -402,22 +410,22 @@ struct RegisterView: View {
         var items: [FastMenuItem] = []
         if !businesses.isEmpty {
             items.append(.submenu("Business", businesses.map { b in
-                .button(b.name) { change(id) { $0.business = b; $0.isPersonal = false } }
+                .button(b.name) { change(id, "Set Business") { $0.business = b; $0.isPersonal = false } }
             } + [
                 .separator,
-                .button("Personal") { change(id) { $0.business = nil; $0.isPersonal = true } },
-                .button("Account Default") { change(id) { $0.business = nil; $0.isPersonal = false } },
+                .button("Personal") { change(id, "Set Business") { $0.business = nil; $0.isPersonal = true } },
+                .button("Account Default") { change(id, "Set Business") { $0.business = nil; $0.isPersonal = false } },
             ]))
         }
         items.append(.submenu("Mark As", ClearedStatus.allCases.map { s in
             .button(s.rawValue.capitalized) {
-                change(id) { $0.status = s; $0.dateCleared = s == .uncleared ? nil : ($0.dateCleared ?? Day.today) }
+                change(id, "Mark \(s.rawValue.capitalized)") { $0.status = s; $0.dateCleared = s == .uncleared ? nil : ($0.dateCleared ?? Day.today) }
             }
         }))
         items += [
             .button(e.isFlagged ? "Clear Flag" : "Add Flag") { toggleFlag(id) },
             .button("Edit Flag…") { flagEditing = e },
-            .button(e.isVoid ? "Unvoid" : "Void") { change(id) { $0.isVoid.toggle() } },
+            .button(e.isVoid ? "Unvoid" : "Void") { change(id, e.isVoid ? "Unvoid" : "Void") { $0.isVoid.toggle() } },
             .separator,
             .button("Delete…") { pendingDelete = id },
         ]

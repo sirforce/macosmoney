@@ -27,6 +27,7 @@
 		41B6976D839804B7A8EDF1C0 /* ScheduleC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99885047A8A897C6A5782C47 /* ScheduleC.swift */; };
 		4253ADC378576EC7703E8502 /* BillStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 908346A220DEFF9A0FAF9724 /* BillStore.swift */; };
 		43420DE413C02860775B9EF9 /* Forecast.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9FAD3ABB7E2DA736D7CD645 /* Forecast.swift */; };
+		4E0B517E0136DE3815FAE0A7 /* EntryUndo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673D1CCE0FF1899AB1A36172 /* EntryUndo.swift */; };
 		4F0EAEF93A9C3701D80D8B37 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7F7749E45A7FB1C1EE07775 /* AppSettings.swift */; };
 		50F0B8171A48F158F8B618E3 /* Reconcile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A341B17587506BC2AD96DD7 /* Reconcile.swift */; };
 		52FA8F3182C31F264BF33982 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA731FE10C24AE87B277CE7 /* Models.swift */; };
@@ -59,6 +60,7 @@
 		C34DA8775BBCB5E5A6C98519 /* MoneyImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0430C220C45DD3218C855E54 /* MoneyImporter.swift */; };
 		D11023CDF3784B9120E0D6F6 /* BackupCryptoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55444FB321CCFA94783F9888 /* BackupCryptoTests.swift */; };
 		D5270F5EEB7F9AA4C97F51C9 /* PurchaseImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B98E5B40368BE2F9A64FA97 /* PurchaseImporter.swift */; };
+		D93591A66CFFEBAB848E7F46 /* EntryUndoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF3BD7E28DA61415B4B7A094 /* EntryUndoTests.swift */; };
 		E33C51A42C843232B4CAAFD9 /* EntryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A5C859EBE3554FBB4CCBF3C /* EntryStore.swift */; };
 		E35D3D2E918320F68A053163 /* MoneyExportFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = C125501FF3AFFC2E99907350 /* MoneyExportFile.swift */; };
 		E36D69F585B34FDE495C2EB6 /* BusinessSetupViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6CA359EF670E3EC6C60745C /* BusinessSetupViews.swift */; };
@@ -106,6 +108,7 @@
 		55444FB321CCFA94783F9888 /* BackupCryptoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupCryptoTests.swift; sourceTree = "<group>"; };
 		6193991917F2598BFFC78ADA /* ForecastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastView.swift; sourceTree = "<group>"; };
 		62A07F448FE22C74E3F186CE /* Backup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Backup.swift; sourceTree = "<group>"; };
+		673D1CCE0FF1899AB1A36172 /* EntryUndo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryUndo.swift; sourceTree = "<group>"; };
 		67833773835F582A2AD6BE37 /* AccountEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountEditor.swift; sourceTree = "<group>"; };
 		680306A532DAF62DEA0C7773 /* SetBalanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetBalanceView.swift; sourceTree = "<group>"; };
 		6A2DBA951F998D806DE385BC /* mny-export.jar */ = {isa = PBXFileReference; lastKnownFileType = archive.jar; path = "mny-export.jar"; sourceTree = "<group>"; };
@@ -140,6 +143,7 @@
 		C125501FF3AFFC2E99907350 /* MoneyExportFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoneyExportFile.swift; sourceTree = "<group>"; };
 		C9FAD3ABB7E2DA736D7CD645 /* Forecast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Forecast.swift; sourceTree = "<group>"; };
 		CA237117861ADF21D3989FB4 /* ScheduleCTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleCTests.swift; sourceTree = "<group>"; };
+		CF3BD7E28DA61415B4B7A094 /* EntryUndoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryUndoTests.swift; sourceTree = "<group>"; };
 		D024B26B5082BFCBC55AE5C3 /* AccountOrderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountOrderTests.swift; sourceTree = "<group>"; };
 		D6DA3EAC8B20B54B8124E51F /* PurchaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseTests.swift; sourceTree = "<group>"; };
 		D991AB965B37449B8564460F /* FindView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindView.swift; sourceTree = "<group>"; };
@@ -169,6 +173,7 @@
 				501BA157234B5EA2BE108AC4 /* BackupTests.swift */,
 				47B1410890AAEFAD84B46D4F /* BankImportTests.swift */,
 				84DCC552786B1DE850BB0B67 /* BillTests.swift */,
+				CF3BD7E28DA61415B4B7A094 /* EntryUndoTests.swift */,
 				4A35A7BB8FE31DB9A1DA8571 /* ImportTests.swift */,
 				96420E312929675B01E642DF /* PresetAndCurveTests.swift */,
 				D6DA3EAC8B20B54B8124E51F /* PurchaseTests.swift */,
@@ -252,6 +257,7 @@
 				F40ECDE037A460EBC41AEF9B /* DataCheck.swift */,
 				4734E060AA67E2B126BA6488 /* Day.swift */,
 				2A5C859EBE3554FBB4CCBF3C /* EntryStore.swift */,
+				673D1CCE0FF1899AB1A36172 /* EntryUndo.swift */,
 				C9FAD3ABB7E2DA736D7CD645 /* Forecast.swift */,
 				539B75057124365D366BD2C6 /* LedgerIndex.swift */,
 				8A341B17587506BC2AD96DD7 /* Reconcile.swift */,
@@ -469,6 +475,7 @@
 				0EFD1509CC3A4FE97F3FB781 /* Day.swift in Sources */,
 				78A3E84D6B6DD3F8AB653476 /* EntryFormView.swift in Sources */,
 				E33C51A42C843232B4CAAFD9 /* EntryStore.swift in Sources */,
+				4E0B517E0136DE3815FAE0A7 /* EntryUndo.swift in Sources */,
 				207C551BDEE4F7234661A732 /* FastTable.swift in Sources */,
 				269A3DDF1A7973E3071511DC /* FindView.swift in Sources */,
 				43420DE413C02860775B9EF9 /* Forecast.swift in Sources */,
@@ -507,6 +514,7 @@
 				A64709289BFA3AB4F9068DCC /* BackupTests.swift in Sources */,
 				B8F31DBB28EB852DCD02D178 /* BankImportTests.swift in Sources */,
 				8FD5118F9D288215087D50D4 /* BillTests.swift in Sources */,
+				D93591A66CFFEBAB848E7F46 /* EntryUndoTests.swift in Sources */,
 				60B635BFF5D8C7429D3B7524 /* ImportTests.swift in Sources */,
 				9B76DD89599E226E218537B2 /* PresetAndCurveTests.swift in Sources */,
 				1C28DD8D50CD216CE922C061 /* PurchaseTests.swift in Sources */,
@@ -583,7 +591,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 0.9;
+				MARKETING_VERSION = 0.10;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -680,7 +688,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 0.9;
+				MARKETING_VERSION = 0.10;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";

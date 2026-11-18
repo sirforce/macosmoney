@@ -86,6 +86,8 @@ Select an account to open its register.
 The form at the bottom of the register (toggle it with the toolbar button) handles new and selected transactions:
 
 - **Double-click a cell to edit it.** Double-clicking a transaction's Payee, Date, Category, Num, Memo, Payment, Deposit or **C** cell selects it, shows the form if it's hidden, and puts the cursor in the matching field, ready to type. A double-click on **C** doesn't change the status; it selects the form's status control, where **U**, **C** or **R** (or ← →) change it. Press Return to save.
+- **Return saves.** Press Return in the Amount or Num field (or anywhere the Save button applies) to save the transaction.
+- **Undo and redo.** ⌘Z undoes the last register change: a form save, a new or deleted transaction, a cleared click, or a Mark As / Flag / Void / Business change from the right-click menu. ⇧⌘Z redoes it. A transfer's matching entry is undone with it, and undoing a delete restores the whole transaction, splits included. While typing in a field, ⌘Z first undoes the typing. Bank imports are undone from the import history instead.
 - **Withdrawal / Deposit / Transfer.** Transfers create the matching entry in the other account and keep both in sync.
 - Payee and category fields suggest existing names; typing a new one creates it. Picking a payee fills in the category and amount from its last use.
 - The memo can be up to four lines long.
@@ -333,6 +335,8 @@ See **[Backup & Restore](backup-and-restore.md)**. In short:
 | ⌘0 | Overview (Payees, Deposit Sources) |
 | ⌘, | Settings |
 | ⌘A | Select all (lists) |
+| Return | Save the transaction in the form |
+| ⌘Z / ⇧⌘Z | Undo / redo the last register change |
 | Delete | Delete selected transaction (with confirmation) |
 | ⌘-click | Add to selection |
 

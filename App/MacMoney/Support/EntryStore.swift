@@ -131,6 +131,11 @@ struct EntryStore {
         return try? context.fetch(d).first
     }
 
+    /// The entry and, for a transfer, its matching entry in the other account.
+    func withPeer(_ e: Entry) -> [Entry] {
+        [e] + (peerEntry(of: e).map { [$0] } ?? [])
+    }
+
     private func lookupAccount(_ id: PersistentIdentifier) -> Account? {
         context.model(for: id) as? Account
     }

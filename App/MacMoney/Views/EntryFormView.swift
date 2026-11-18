@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 import SwiftData
 
 /// Money-style transaction form under the register: Withdrawal / Deposit / Transfer.
@@ -19,6 +20,10 @@ struct EntryFormView: View {
     @State private var draft = EntryDraft()
     @State private var error: String?
     @FocusState private var focus: Field?
+    @Environment(\.undoManager) private var undoManager
+    @State private var submitGuard = SubmitGuard()
+
+    private final class SubmitGuard { var timestamp: TimeInterval? }
 
     enum Field { case payee, date, category, number, memo, amount, status }
 
@@ -83,6 +88,7 @@ struct EntryFormView: View {
                     Text("Number:")
                     TextField("Num", text: $draft.number).frame(width: 140)
                         .focused($focus, equals: .number)
+                        .onSubmit { save() }
                 }
                 GridRow {
                     Text("Memo:")
@@ -95,6 +101,7 @@ struct EntryFormView: View {
                         .multilineTextAlignment(.trailing)
                         .frame(width: 140)
                         .focused($focus, equals: .amount)
+                        .onSubmit { save() }
                 }
                 GridRow {
                     Color.clear.gridCellUnsizedAxes([.horizontal, .vertical])
@@ -158,6 +165,11 @@ struct EntryFormView: View {
             takeFocusRequest()
         }
         .onChange(of: focusRequest.wrappedValue) { takeFocusRequest() }
+        .onReceive(NotificationCenter.default.publisher(for: EntryUndo.didApply)) { _ in
+            // An undo or redo changed the register; show the entry as it is now. A new-entry draft is left alone.
+            guard let entry else { return }
+            if entry.isDeleted || entry.modelContext == nil { onSaved(nil) } else { load() }
+        }
     }
 
     private func takeFocusRequest() {
@@ -303,7 +315,17 @@ struct EntryFormView: View {
                 error = "Choose the account to transfer to."
                 return
             }
-            let saved = try EntryStore(context: context).save(draft, into: account, editing: entry)
+            // Return in a field and the default button can both fire for one keystroke; save once.
+            if let event = NSApp.currentEvent, event.type == .keyDown {
+                if submitGuard.timestamp == event.timestamp { return }
+                submitGuard.timestamp = event.timestamp
+            }
+            let draft = draft
+            let saved = try EntryUndo.record(entry == nil ? "New Transaction" : "Edit Transaction",
+                                             context: context, undoManager: undoManager,
+                                             touching: entry.map { [$0] } ?? [],
+                                             change: { try EntryStore(context: context).save(draft, into: account, editing: entry) },
+                                             result: { [$0] })
             onSaved(entry == nil ? nil : saved)
             if entry == nil { load() }
         } catch {

@@ -1,6 +1,6 @@
 # MacMoney
 
-**Version 0.9** (pre-release)
+**Version 0.10** (pre-release)
 
 A native macOS replacement for **Microsoft Money Plus Sunset Edition**. It imports your `.mny` file with its whole history and keeps the way Money works: registers, flags, bills & deposits, payee reports and forecasting. It also adds things Money never had, such as Schedule C tracking for one or more sole-proprietor businesses.
 

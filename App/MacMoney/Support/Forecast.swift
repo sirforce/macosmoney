@@ -113,9 +113,11 @@ struct Forecast {
         historyStart = lookbackStart
         var past: [Point] = []
         var pastEvents: [Event] = []
-        let pastEntries = accounts.flatMap { a in (a.entries ?? []).map { (a, $0) } }
-            .filter { $0.1.date >= lookbackStart && $0.1.date <= today && $0.1.balanceEffectCents != 0 }
-            .sorted { ($0.1.date, $0.1.amountCents < 0 ? 0 : 1) < ($1.1.date, $1.1.amountCents < 0 ? 0 : 1) }
+        // Same day: withdrawals before deposits.
+        func order(_ e: Entry) -> (Date, Int) { (e.date, e.amountCents < 0 ? 0 : 1) }
+        let pastEntries: [(Account, Entry)] = accounts.flatMap { a in (a.entries ?? []).map { (a, $0) } }
+            .filter { (_, e) in e.date >= lookbackStart && e.date <= today && e.balanceEffectCents != 0 }
+            .sorted { order($0.1) < order($1.1) }
         var running = accounts.reduce(0) { $0 + $1.balance(asOf: Day.adding(.day, -1, to: lookbackStart)) }
         past.append(Point(date: lookbackStart, balanceCents: running))
         for (a, e) in pastEntries {
