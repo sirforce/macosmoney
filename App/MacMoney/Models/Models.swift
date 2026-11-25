@@ -341,7 +341,7 @@ enum Schema1 {
         Account.self, Category.self, Payee.self, Entry.self, Bill.self, ImportRecord.self,
         Business.self, Vehicle.self, MileageEntry.self, ReportPreset.self,
         Scenario.self, ScenarioItem.self, BankRecord.self, BankImportBatch.self,
-        Purchase.self, PurchaseItem.self, PurchaseFile.self, AppSettings.self,
+        Purchase.self, PurchaseItem.self, PurchaseFile.self, AppSettings.self, Asset.self,
     ]
 }
 

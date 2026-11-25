@@ -71,4 +71,38 @@ final class ScheduleCTests: XCTestCase {
         let actual = ScheduleCReport(business: biz, range: Day.date(year: 2025, month: 1, day: 1)...Day.date(year: 2025, month: 12, day: 31), context: ctx)
         XCTAssertEqual(actual.cents(.carTruck), 32_000)
     }
+
+    func testAssetDepreciationGoesOnLine13OncePerTaxYear() throws {
+        let container = try ModelContainer(for: Schema(Schema1.models), configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        let ctx = ModelContext(container)
+        let biz = Business(name: "Studio"), other = Business(name: "Other")
+        ctx.insert(biz); ctx.insert(other)
+        let camera = Asset(name: "Camera")
+        camera.businessUUID = biz.uuid
+        camera.costCents = 3_000_00
+        camera.priorDepreciationCents = 200_00
+        camera.yearAmounts = [2024: 600_00, 2025: 960_00]
+        ctx.insert(camera)
+        let theirs = Asset(name: "Someone else's")
+        theirs.businessUUID = other.uuid
+        theirs.yearAmounts = [2025: 111_00]
+        ctx.insert(theirs)
+        try ctx.save()
+
+        func report(_ from: Date, _ to: Date) -> ScheduleCReport { ScheduleCReport(business: biz, range: from...to, context: ctx) }
+        let y2025 = report(Day.date(year: 2025, month: 1, day: 1), Day.date(year: 2025, month: 12, day: 31))
+        XCTAssertEqual(y2025.cents(.depreciation), 960_00)
+        XCTAssertEqual(y2025.totalExpenses, 960_00)
+        XCTAssertEqual(y2025.netProfit, -960_00)
+        XCTAssertEqual(y2025.assets.map(\.name), ["Camera"])
+        XCTAssertTrue(y2025.csv().contains("Depreciation (line 13)"))
+        // Part of a year: not yet. Two whole years: both, once each.
+        XCTAssertEqual(report(Day.date(year: 2025, month: 1, day: 1), Day.date(year: 2025, month: 6, day: 30)).cents(.depreciation), 0)
+        XCTAssertEqual(report(Day.date(year: 2024, month: 1, day: 1), Day.date(year: 2025, month: 12, day: 31)).cents(.depreciation), 1_560_00)
+        XCTAssertEqual(report(Day.date(year: 2026, month: 1, day: 1), Day.date(year: 2026, month: 12, day: 31)).cents(.depreciation), 0)
+
+        XCTAssertEqual(camera.depreciatedCents(), 1_760_00)
+        XCTAssertEqual(camera.depreciatedCents(through: 2024), 800_00)
+        XCTAssertEqual(camera.remainingCents(), 1_240_00)
+    }
 }

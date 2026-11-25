@@ -122,7 +122,7 @@ final class LedgerIndex {
                 payeeName[id] = p.name
                 if p.isHidden { hiddenPayees.insert(id) } else { hiddenPayees.remove(id) }
             case "Account": accountsChanged = true
-            case "Bill", "ImportRecord", "MileageEntry", "ReportPreset", "Scenario", "ScenarioItem", "BankRecord", "BankImportBatch", "Purchase", "PurchaseItem", "PurchaseFile", "AppSettings": continue
+            case "Bill", "ImportRecord", "MileageEntry", "ReportPreset", "Scenario", "ScenarioItem", "BankRecord", "BankImportBatch", "Purchase", "PurchaseItem", "PurchaseFile", "AppSettings", "Asset": continue
             default: return false
             }
         }

@@ -78,6 +78,9 @@ struct BillsView: View {
             .inspectorColumnWidth(min: 300, ideal: 340, max: 460)
         }
         .navigationTitle("Bills & Deposits")
+        .onAppear {
+            if let name = DemoTour.preset("bills.select") { selection = bills.first { $0.payee?.name == name }?.persistentModelID }
+        }
         .navigationSubtitle("\(bills.filter(\.isActive).count) active")
         .toolbar {
             ToolbarItemGroup {

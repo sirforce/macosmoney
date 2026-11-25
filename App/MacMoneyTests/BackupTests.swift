@@ -170,4 +170,91 @@ final class BackupTests: XCTestCase {
         XCTAssertTrue(r.healthy)
         XCTAssertTrue(r.issues.contains { $0.title.contains("missing the other side") })
     }
+
+    /// A backup made by an older version (before a kind of record existed) restores into this
+    /// version: everything in it comes back, and the newer features start empty and work.
+    func testBackupFromOlderVersionRestoresAndGainsNewFeatures() throws {
+        let store = dir.appendingPathComponent("MacMoney.store")
+        let folder = dir.appendingPathComponent("Backups")
+        let old = dir.appendingPathComponent("Old.store")
+
+        // The data file as an earlier version wrote it: no asset list yet.
+        let olderModels = Schema1.models.filter { ObjectIdentifier($0) != ObjectIdentifier(Asset.self) }
+        XCTAssertEqual(olderModels.count, Schema1.models.count - 1)
+        do {
+            let config = ModelConfiguration("Test", schema: Schema(olderModels), url: old, cloudKitDatabase: .none)
+            let ctx = ModelContext(try ModelContainer(for: Schema(olderModels), configurations: config))
+            let a = Account(name: "Checking")
+            ctx.insert(a)
+            a.openingBalanceCents = 1_234_56
+            let b = Business(name: "Studio")
+            ctx.insert(b)
+            let e = Entry(account: a, date: Day.date(year: 2024, month: 3, day: 1), amountCents: -42_00)
+            ctx.insert(e)
+            e.business = b
+            e.memo = "from the old version"
+            try ctx.save()
+        }
+        let backup = try Backup.make(.manual, store: old, folder: folder, encryption: .none)
+
+        // Today's data, made by this version, is replaced by the old backup.
+        try withStore(store) { ctx in
+            ctx.insert(Account(name: "Newer account"))
+            ctx.insert(Asset(name: "Newer asset"))
+        }
+        try Backup.scheduleRestore(from: backup)
+        let msg = Backup.applyPendingRestore(store: store, folder: folder, encryption: .none)
+        XCTAssertTrue(msg?.hasPrefix("Restored") ?? false, msg ?? "nil")
+
+        try withStore(store) { ctx in
+            let accounts = try ctx.fetch(FetchDescriptor<Account>())
+            XCTAssertEqual(accounts.map(\.name), ["Checking"])
+            XCTAssertEqual(accounts.first?.openingBalanceCents, 1_234_56)
+            let e = try XCTUnwrap(try ctx.fetch(FetchDescriptor<Entry>()).first)
+            XCTAssertEqual(e.memo, "from the old version")
+            XCTAssertEqual(e.business?.name, "Studio")
+            XCTAssertEqual(try ctx.fetchCount(FetchDescriptor<Asset>()), 0, "the old file had no assets")
+            // The newer feature works on the restored file.
+            let asset = Asset(name: "Camera")
+            asset.businessUUID = e.business?.uuid
+            asset.yearAmounts = [2025: 500_00]
+            ctx.insert(asset)
+        }
+        try withStore(store) { ctx in
+            XCTAssertEqual(try ctx.fetch(FetchDescriptor<Asset>()).first?.yearAmounts[2025], 500_00)
+        }
+        XCTAssertEqual(try Backup.integrityCheck(store), ["ok"])
+        // And the newer data that was replaced is still there in the safety backup.
+        let safety = try XCTUnwrap(Backup.list(in: folder).first { $0.reason == .beforeRestore })
+        try withStore(safety.url) { ctx in XCTAssertEqual(try ctx.fetch(FetchDescriptor<Asset>()).first?.name, "Newer asset") }
+    }
+
+    /// The asset list is in the data file, so backups carry it.
+    func testAssetsComeBackFromABackup() throws {
+        let store = dir.appendingPathComponent("MacMoney.store")
+        let folder = dir.appendingPathComponent("Backups")
+        let businessID = UUID()
+        try withStore(store) { ctx in
+            let a = Asset(name: "Printer")
+            a.businessUUID = businessID
+            a.costCents = 1_895_00
+            a.method = "5-yr MACRS"
+            a.priorDepreciationCents = 100_00
+            a.yearAmounts = [2024: 379_00, 2025: 606_40]
+            a.placedInService = Day.date(year: 2024, month: 8, day: 22)
+            ctx.insert(a)
+        }
+        let backup = try Backup.make(.manual, store: store, folder: folder, encryption: .password("correct horse"))
+        try withStore(store) { ctx in for a in try ctx.fetch(FetchDescriptor<Asset>()) { ctx.delete(a) } }
+        try Backup.scheduleRestore(from: backup, password: "correct horse", stagingFolder: dir)
+        _ = Backup.applyPendingRestore(store: store, folder: folder, encryption: .none)
+        try withStore(store) { ctx in
+            let a = try XCTUnwrap(try ctx.fetch(FetchDescriptor<Asset>()).first)
+            XCTAssertEqual(a.name, "Printer")
+            XCTAssertEqual(a.businessUUID, businessID)
+            XCTAssertEqual(a.yearAmounts, [2024: 379_00, 2025: 606_40])
+            XCTAssertEqual(a.remainingCents(), 809_60)
+            XCTAssertEqual(a.placedInService, Day.date(year: 2024, month: 8, day: 22))
+        }
+    }
 }

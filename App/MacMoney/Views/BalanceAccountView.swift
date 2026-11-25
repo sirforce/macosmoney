@@ -36,6 +36,13 @@ struct BalanceAccountView: View {
             case .done(let n): done(n)
             }
         }
+        .onAppear {
+            // Screenshot tour: open on the checklist, with a statement that ends at today's balance.
+            guard DemoTour.preset("balance.marking") != nil else { return }
+            statement.date = Day.today
+            statement.endingCents = index.totals[account.persistentModelID]?.today ?? clearedCents
+            phase = .marking
+        }
         .onChange(of: difference) { old, new in
             guard case .marking = phase, new == 0, old != 0 else { return }
             if NSSound(named: "Glass")?.play() != true { NSSound.beep() }

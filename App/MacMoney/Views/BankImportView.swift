@@ -18,7 +18,7 @@ struct BankImportView: View {
     @State private var amazonExport: URL?
 
     private enum Tab: String, CaseIterable { case importFiles = "Import", history = "History" }
-    @State private var tab: Tab = .importFiles
+    @State private var tab: Tab = DemoTour.preset("bankImport.tab") == nil ? .importFiles : .history
     @State private var items: [Item] = []
     @State private var targets: [UUID: String] = [:]          // item id → target key
     @State private var checks: [String: Check] = [:]          // target key → balance check

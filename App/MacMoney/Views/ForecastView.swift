@@ -22,7 +22,7 @@ struct ForecastView: View {
     /// The forecast without the scenario, for comparison (nil when no scenario is shown).
     @State private var baseline: Forecast?
     @AppStorage("forecast.scenario") private var scenarioChoice = ""
-    @State private var showScenarios = false
+    @State private var showScenarios = DemoTour.preset("forecast.showScenarios") != nil
     @Environment(LedgerIndex.self) private var index
 
     private static let horizons = [3, 6, 12, 18, 24, 36]
@@ -67,6 +67,11 @@ struct ForecastView: View {
             }
         }
         .sheet(isPresented: $showScenarios) { ScenariosView(chosen: $scenarioChoice) }
+        .onAppear {
+            if let name = DemoTour.preset("forecast.scenarioName"), let s = scenarios.first(where: { $0.name == name }) {
+                scenarioChoice = s.uuid.uuidString
+            }
+        }
     }
 
     /// Rows for the table: the forecast, plus actual history when a custom range starts in the past.

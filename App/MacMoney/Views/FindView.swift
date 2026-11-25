@@ -7,7 +7,7 @@ struct FindView: View {
     @Environment(LedgerIndex.self) private var index
     var open: (_ entry: PersistentIdentifier, _ account: PersistentIdentifier) -> Void
 
-    @State private var query = ""
+    @State private var query = DemoTour.preset("find.query") ?? ""
     @State private var period: ReportPeriod = .allDates
     @State private var memoOnly = false
     @State private var selection = Set<PersistentIdentifier>()

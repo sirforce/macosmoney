@@ -151,7 +151,9 @@ struct ContentView: View {
                 }
             }
         } detail: {
-            detail
+            detail.onReceive(NotificationCenter.default.publisher(for: .demoScene)) { note in
+                if let scene = note.object as? DemoScene { show(scene) }
+            }
         }
         .sheet(isPresented: $showImport) { ImportView() }
         .sheet(isPresented: $showBackups) { BackupsView() }
@@ -236,6 +238,47 @@ struct ContentView: View {
         bankImport = nil
         selection = .purchases
         pendingAmazon = url
+    }
+
+    /// Screenshot tour (`--demo-tour`): goes to a screen and opens what the scene asks for.
+    private func show(_ scene: DemoScene) {
+        payeeJump = nil
+        purchaseJump = nil
+        focusEntry = nil
+        bankImport = nil
+        showBackups = false
+        showDataCheck = false
+        if let name = scene.account, let a = accounts.first(where: { $0.name == name }) {
+            if let payee = scene.focusPayee {
+                focusEntry = (a.entries ?? []).filter { $0.payee?.name == payee && $0.date <= Day.today }
+                    .max { $0.date < $1.date }?.persistentModelID
+            }
+            selection = .account(a.persistentModelID)
+        } else if let name = scene.business, let b = businesses.first(where: { $0.name == name }) {
+            selection = .business(b.persistentModelID)
+        } else {
+            switch scene.page {
+            case "payees": selection = .payees
+            case "depositSources": selection = .depositSources
+            case "bills": selection = .bills
+            case "forecast": selection = .forecast
+            case "find": selection = .find
+            case "allBusinesses": selection = .allBusinesses
+            case "purchases":
+                purchaseJump = scene.purchaseVendor.flatMap { v in allPurchases.filter { $0.vendor == v }.max { $0.date < $1.date }?.uuid }
+                selection = .purchases
+            default: selection = nil
+            }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+            switch scene.sheet {
+            case "bankImport": bankImport = BankImportRequest(urls: [DemoMode.downloadsFolder])
+            case "backups": showBackups = true
+            case "dataCheck": showDataCheck = true
+            case "balance": NotificationCenter.default.post(name: .balanceAccount, object: nil)
+            default: break
+            }
+        }
     }
 
     private func accountRow(_ a: Account) -> some View {

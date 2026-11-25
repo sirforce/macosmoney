@@ -118,3 +118,9 @@ Each finding shows up to five examples (date, account, payee, amount).
 - Encryption: [`BackupCrypto.swift`](../App/MacMoney/Support/BackupCrypto.swift), including the file layout and the keychain storage.
 - Settings are stored in user defaults under `backup.*`.
 - An unencrypted backup is an ordinary SQLite database you can inspect with `sqlite3`. An encrypted one starts with the bytes `MMBK`, and only MacMoney's restore (or the documented format) can open it.
+
+## Backups from older versions
+
+A backup made by an earlier version of MacMoney restores into a newer one. Everything that was in it comes back, and features added since (for example the asset list) simply start empty. As with any restore, the data you had before is saved first as a *Before restore* backup.
+
+Going the other way isn't supported: don't restore a backup made by a newer version into an older copy of the app.

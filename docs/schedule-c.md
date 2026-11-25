@@ -34,7 +34,8 @@ The transaction's own **tax line override**, if it has one; otherwise its **cate
 1. **Add Business…** in the sidebar. Enter a name, plus an EIN and notes if you like.
 2. **Link accounts** that are business-only: right-click the account ▸ **Edit** ▸ *Business*.
 3. **Tax Line Setup** tab: map each category you use for business to a Schedule C line. You only do this once; it applies to every year and every business, and survives re-import from Money.
-4. **Tag Transactions** tab, for mixed accounts:
+4. **Assets** tab: enter equipment and its yearly depreciation from your accountant's schedule (see [Assets and depreciation](#assets-and-depreciation)).
+5. **Tag Transactions** tab, for mixed accounts:
    - Filter by account, period, and a **Show** option: All, Not tagged, This business, This business with no tax line, Marked personal. Search payee, memo or category, and hide transfers.
    - Select rows (⌘A for all), then **Tag as *Business***, **Personal**, **Tax Line**, **Business %**, **Vehicle**, or **Clear Tags** to go back to the account's default.
    - The **Line** column is orange where a business transaction still has no line.
@@ -73,6 +74,22 @@ You can also tag one transaction at a time: right-click it in a register ▸ **B
 | 2024 | 67 |
 | 2025 | 70 |
 | 2026 and later | *enter when the IRS publishes them* |
+
+## Assets and depreciation
+
+Equipment, computers and furniture are usually deducted over several years rather than when you buy them. The **Assets** tab keeps that list for each business.
+
+- **Add Asset**, then enter its description, the date it was placed in service, its cost and the method as your accountant's schedule words it ("5-yr MACRS", "Section 179").
+- **Depreciation by tax year:** enter each year's amount from the schedule. If the asset already has history you don't want to type year by year, put the total so far in **Before the years below**.
+- Each year's amounts go on **line 13** of that year's Schedule C, and appear in Profit & Loss and the CSV export.
+- The list shows cost, the selected year's amount, the total depreciated and what remains. An asset depreciated beyond its cost is shown in red.
+- When an asset is sold or scrapped, tick **Sold, scrapped or no longer used** and set the date. Its past depreciation stays on the years it was claimed.
+
+**MacMoney doesn't calculate depreciation.** The method, Section 179 and bonus depreciation are tax decisions, so the numbers here should be the ones your accountant filed. The most recent depreciation schedule (the worksheet that goes with Form 4562) is all you need to get started: it lists every asset with its cost, date, prior depreciation and current-year amount.
+
+A year's depreciation counts in a report that includes that year's December 31. A tax-year report always does; a custom range that stops mid-year doesn't include that year's depreciation yet.
+
+Purchases marked **Equipment / asset purchase** are still tracked as before and stay out of your expenses. Add the asset here so its depreciation is counted.
 
 ## Reports
 

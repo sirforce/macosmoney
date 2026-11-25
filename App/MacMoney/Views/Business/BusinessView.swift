@@ -11,11 +11,12 @@ struct BusinessView: View {
         case profitLoss = "Profit & Loss"
         case tag = "Tag Transactions"
         case vehicles = "Vehicles & Mileage"
+        case assets = "Assets"
         case taxLines = "Tax Line Setup"
         var id: String { rawValue }
     }
 
-    @State private var tab: Tab = .scheduleC
+    @State private var tab: Tab = DemoTour.preset("business.tab").flatMap(Tab.init(rawValue:)) ?? .scheduleC
     @State private var editing = false
 
     var body: some View {
@@ -25,6 +26,7 @@ struct BusinessView: View {
             case .profitLoss: ProfitLossView(business: business)
             case .tag: TagTransactionsView(business: business)
             case .vehicles: VehiclesView(business: business)
+            case .assets: AssetsView(business: business)
             case .taxLines: TaxLineSetupView(business: business)
             }
         }
@@ -155,7 +157,7 @@ struct ScheduleCView: View {
     let business: Business
     var onFixLines: () -> Void
 
-    @State private var year = Day.year(of: Day.today)
+    @State private var year = Day.year(of: Day.today) - (DemoTour.preset("business.lastYear") == nil ? 0 : 1)
     @State private var custom = false
     @State private var from = Day.startOfYear(Day.today)
     @State private var to = Day.today
@@ -243,6 +245,19 @@ struct ScheduleCView: View {
             if line == .meals, let t = total {
                 Text("\(Cents.string(t.cents)) spent · 50% deductible").font(.caption).foregroundStyle(.secondary)
             }
+            if line == .depreciation {
+                ForEach(r.assets) { a in
+                    HStack(spacing: 10) {
+                        Text(Day.string(a.placedInService)).monospacedDigit().frame(width: 76, alignment: .leading)
+                        Text(a.name).frame(width: 240, alignment: .leading).lineLimit(1)
+                        Text(a.method).foregroundStyle(.secondary).lineLimit(1)
+                        Spacer()
+                        Text("cost \(Cents.string(a.costCents))").font(.caption).foregroundStyle(.secondary)
+                        Text(Cents.string(a.cents)).monospacedDigit().frame(width: 100, alignment: .trailing)
+                    }
+                    .font(.callout)
+                }
+            }
             if line == .carTruck, !r.vehicles.isEmpty {
                 Text("Includes vehicle worksheet amounts (see Part IV)").font(.caption).foregroundStyle(.secondary)
             }
@@ -251,11 +266,12 @@ struct ScheduleCView: View {
             HStack {
                 Text(line.label)
                 Spacer()
-                if let n = total?.items.count, n > 0 { Text("\(n)").font(.caption).foregroundStyle(.secondary) }
+                let count = (total?.items.count ?? 0) + (line == .depreciation ? r.assets.count : 0)
+                if count > 0 { Text("\(count)").font(.caption).foregroundStyle(.secondary) }
                 Text(Cents.string(amount)).monospacedDigit().frame(width: 120, alignment: .trailing)
             }
         }
-        .disabled((total?.items.isEmpty ?? true) && line != .carTruck)
+        .disabled((total?.items.isEmpty ?? true) && line != .carTruck && !(line == .depreciation && !r.assets.isEmpty))
     }
 
     private func totalRow(_ title: String, _ cents: Int, bold: Bool = false) -> some View {
@@ -315,7 +331,7 @@ struct AllBusinessesView: View {
     @Environment(\.modelContext) private var context
     @Environment(LedgerIndex.self) private var index
     @Query(sort: \Business.name) private var businesses: [Business]
-    @State private var year = Day.year(of: Day.today)
+    @State private var year = Day.year(of: Day.today) - (DemoTour.preset("business.lastYear") == nil ? 0 : 1)
     @State private var custom = false
     @State private var from = Day.startOfYear(Day.today)
     @State private var to = Day.today

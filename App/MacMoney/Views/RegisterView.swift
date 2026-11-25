@@ -137,7 +137,7 @@ struct RegisterView: View {
         .onAppear {
             // Each account remembers its own view; closed accounts default to everything.
             let saved = UserDefaults.standard.string(forKey: filterKey).flatMap(RegisterFilter.init(rawValue:))
-            filter = saved ?? (account.isReadOnly ? .all : .unreconciled)
+            filter = DemoTour.preset("register.filter").flatMap(RegisterFilter.init(rawValue:)) ?? saved ?? (account.isReadOnly ? .all : .unreconciled)
             applyFocus()
         }
         .onChange(of: filter) {

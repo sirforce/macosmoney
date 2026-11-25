@@ -269,7 +269,8 @@ See **[Schedule C & Businesses](schedule-c.md)** for the full guide. In short:
 2. Link business-only accounts to it (edit the account), and/or use **Tag Transactions** to mark business items in mixed accounts.
 3. **Tax Line Setup:** map categories to Schedule C lines once.
 4. **Vehicles & Mileage:** add vehicles, log trips, choose standard mileage or actual expenses.
-5. **Schedule C** and **Profit & Loss** tabs give the reports, with CSV export.
+5. **Assets:** list equipment and enter each year's depreciation from your accountant's schedule; it goes on line 13.
+6. **Schedule C** and **Profit & Loss** tabs give the reports, with CSV export.
 
 ## Purchases
 

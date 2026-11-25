@@ -9,8 +9,13 @@ struct MacMoneyApp: App {
 
     init() {
         Backup.registerDefaults()
-        Backup.applyPendingRestore()   // must happen before the store is opened
+        if DemoMode.isOn {
+            DemoMode.prepare()         // sample data in its own folder; your real data is never opened
+        } else {
+            Backup.applyPendingRestore()   // must happen before the store is opened
+        }
         container = Self.makeContainer()
+        if DemoMode.isOn && !DemoMode.startsEmpty { DemoData.seedIfEmpty(container.mainContext) }
     }
 
     var body: some Scene {
@@ -20,6 +25,7 @@ struct MacMoneyApp: App {
                 .task {
                     _ = AppSettings.current(in: container.mainContext)   // makes it, moving old preferences in
                     index.start(container.mainContext)
+                    if DemoTour.isOn { await DemoTour.run(context: container.mainContext) }
                 }
         }
         .modelContainer(container)
@@ -58,7 +64,7 @@ struct MacMoneyApp: App {
 
     /// The store lives in ~/Library/Application Support/MacMoney/. It is a standard SQLite file.
     static func makeContainer() -> ModelContainer {
-        let dir = URL.applicationSupportDirectory.appendingPathComponent("MacMoney", isDirectory: true)
+        let dir = Backup.dataFolder
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         let config = ModelConfiguration("MacMoney", schema: Schema(Schema1.models),
                                         url: dir.appendingPathComponent("MacMoney.store"),

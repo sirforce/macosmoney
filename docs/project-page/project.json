@@ -1,0 +1,469 @@
+{
+  "schema": 1,
+  "slug": "macmoney",
+  "name": "MacMoney",
+  "tagline": "A native macOS replacement for Microsoft Money.",
+  "summary": "MacMoney is a native Mac app for people who still keep their finances in Microsoft Money Plus Sunset Edition. It imports a Money file with its whole history, keeps the way Money works (registers, flags, bills and deposits, payee reports, forecasting) and adds what Money never had: safe bank-download imports, item-level purchases, what-if scenarios and Schedule C tracking for a home business.",
+  "description": [
+    "Microsoft Money was discontinued years ago and only runs on Windows. MacMoney reads the .mny file directly, read-only, and brings in accounts, categories, payees, transactions, splits, transfers, flags and recurring bills. Importing again is safe, so Money and MacMoney can run side by side until the switch is final.",
+    "From there it is a full personal-finance app. Bank and card downloads go in without ever adding a transaction twice. Registers reconcile against statements. A forecast projects balances from bills and deposits, and what-if scenarios show what a decision would do before it is made. One or more sole-proprietor businesses can be tracked through their own accounts or tagged inside personal ones, producing a draft Schedule C.",
+    "Everything stays on the Mac. The app makes no network connections, the data is a standard SQLite file, and backups are verified and can be encrypted."
+  ],
+  "status": "Pre-release",
+  "version": "0.11",
+  "updated": "2026-11-25",
+  "started": "2026-10",
+  "platform": "macOS 26 (Tahoe) or later",
+  "license": "MIT",
+  "role": "Solo project: design, development and documentation",
+  "links": {
+    "repository": "https://github.com/sirforce/macosmoney",
+    "userGuide": "https://github.com/sirforce/macosmoney/blob/main/docs/user-guide.md",
+    "architecture": "https://github.com/sirforce/macosmoney/blob/main/docs/architecture.md",
+    "rawBase": "https://raw.githubusercontent.com/sirforce/macosmoney/main/"
+  },
+  "techStack": [
+    "Swift",
+    "SwiftUI",
+    "SwiftData (SQLite)",
+    "AppKit (NSTableView)",
+    "Swift Charts",
+    "ScreenCaptureKit",
+    "CryptoKit / CommonCrypto",
+    "Java (Jackcess) for the Money file converter",
+    "XcodeGen",
+    "XCTest"
+  ],
+  "stats": [
+    {
+      "label": "Swift in the app",
+      "value": "about 13,000 lines"
+    },
+    {
+      "label": "Unit tests",
+      "value": "68"
+    },
+    {
+      "label": "Data models",
+      "value": "19"
+    },
+    {
+      "label": "Network connections",
+      "value": "0"
+    },
+    {
+      "label": "Register rows shown without lag",
+      "value": "10,000+"
+    }
+  ],
+  "features": [
+    {
+      "area": "Import from Microsoft Money",
+      "summary": "Reads .mny files from Money 2005 through Sunset Edition, including password-protected ones, without modifying them.",
+      "points": [
+        "Accounts, categories, payees, transactions, splits, transfers, flags and recurring bills",
+        "Re-import as often as you like: Money's records update in place and everything added in MacMoney is kept",
+        "The import summary compares every account's balance with what Money stored, to the cent",
+        "A backup is taken before every import"
+      ]
+    },
+    {
+      "area": "Bank and card downloads",
+      "summary": "CSV, Excel and OFX/QFX from Bank of America, Chase, American Express, Discover and most other banks.",
+      "points": [
+        "Drop a file or a whole folder; each file finds its account from what the app learned last time",
+        "Nothing is ever added twice, even from overlapping files",
+        "Payments already entered by hand are matched instead of duplicated",
+        "Edits are kept and deleted rows stay deleted on re-import",
+        "Payee names are tidied; the bank's original text is kept and searchable",
+        "Optional balance check, import history, and undo for every import"
+      ]
+    },
+    {
+      "area": "Registers",
+      "summary": "One register per account, built to feel like Money's.",
+      "points": [
+        "Running balance, cleared and reconciled status, voids, transfers and splits",
+        "Flags with a note and an action date",
+        "Balance Account reconciles against a statement and beeps at zero; sessions can be postponed",
+        "Filters (Unreconciled, Flagged, Upcoming, date ranges) and search in one account or all of them",
+        "Double-click a cell to edit that field; Return saves; undo and redo for register changes",
+        "Bank, credit card, loan and investment accounts, with Set Balance and drag-to-order"
+      ]
+    },
+    {
+      "area": "Purchases",
+      "summary": "What was bought, item by item, linked to the charge that paid for it.",
+      "points": [
+        "Import a whole Amazon order history; shipments link to their card charges automatically",
+        "Itemize any charge by hand, from any store",
+        "Press B or P to mark items business or personal, with a Schedule C line, business-use % and purpose",
+        "Notes, web links and receipt files (referenced where they are, never copied)"
+      ]
+    },
+    {
+      "area": "Find, Payees and Deposit Sources",
+      "summary": "Search everything, and see where money goes and where it comes from.",
+      "points": [
+        "Find across every account, open or closed",
+        "Per-payee trend chart, totals by year and by category, every transaction, CSV export",
+        "Select several payees at once; save selections and filters as presets",
+        "Back and forward navigation between reports"
+      ]
+    },
+    {
+      "area": "Bills & Deposits",
+      "summary": "Recurring items that keep their day of the month.",
+      "points": [
+        "Weekly, every other week, twice a month, monthly, quarterly, yearly and more",
+        "Enter, skip, or pre-load everything due into the right registers",
+        "Transfer bills post to both accounts",
+        "Optional auto-pay flag on entered items"
+      ]
+    },
+    {
+      "area": "Forecast and what-if scenarios",
+      "summary": "A balance projection that never double counts, plus named scenarios laid over it.",
+      "points": [
+        "Today's balance + entries made ahead + bills not yet entered",
+        "3 to 36 months or a custom range, for one account or all bank accounts",
+        "Hover the chart to see what moves the balance each day",
+        "Scenarios: one-time or recurring amounts, changed or stopped bills, drawn against the baseline with the difference shown"
+      ]
+    },
+    {
+      "area": "Business / Schedule C",
+      "summary": "Bookkeeping for one or more sole-proprietor businesses, including a home-based one.",
+      "points": [
+        "Link whole accounts to a business, or tag individual transactions in mixed personal accounts",
+        "Map categories to Schedule C lines once",
+        "Business-use percentages (for example 40% of home internet), 50% meals",
+        "Vehicles with a trip log: standard mileage or actual expenses",
+        "Asset list with each year's depreciation, entered from the accountant's schedule, feeding line 13",
+        "Schedule C and profit & loss per business or for all, with CSV for the accountant"
+      ]
+    },
+    {
+      "area": "Backup, restore and data checks",
+      "summary": "Built so the data file can be trusted.",
+      "points": [
+        "Verified point-in-time backups, manual or automatic on quit",
+        "Optional AES-256 encryption and iCloud Drive folder",
+        "A safety backup before every import and every restore",
+        "Check Data File looks for database damage and bookkeeping inconsistencies",
+        "Backups made by older versions restore into newer ones, checked by a test"
+      ]
+    }
+  ],
+  "technicalHighlights": [
+    {
+      "title": "Reading a format with no specification",
+      "detail": "A Money file is an encrypted Jet database with an undocumented schema. A small bundled Java converter (built on Jackcess) opens a copy read-only and writes JSON; the app decodes that and merges it. The schema notes worked out along the way are published in the repository."
+    },
+    {
+      "title": "Re-import that is always safe",
+      "detail": "Every record from Money carries its Money id, and the importer writes only Money-owned fields. App-owned fields (business tags, tax lines, notes, presets) live separately, so importing the same file a hundred times changes nothing and loses nothing."
+    },
+    {
+      "title": "Bank imports that never duplicate",
+      "detail": "Each bank row gets a fingerprint (the bank's reference, or date + amount + normalized description, with an occurrence number so two identical same-day charges stay two). Fingerprints are remembered even after the transaction is edited or deleted. Rows that match something already in the register within a week are linked rather than added."
+    },
+    {
+      "title": "Exact money, stable dates",
+      "detail": "Amounts are integer cents everywhere; there is no floating point where money is added up. Dates are calendar days stored at noon UTC, so a transaction never changes day when the time zone does."
+    },
+    {
+      "title": "Fast with decades of history",
+      "detail": "Views never walk the SwiftData relationship graph. A ledger index keeps plain value rows, built once at launch (about 0.6 s for 8,000 entries) and patched from save notifications (about 40 ms). Large lists use a custom NSTableView wrapper with fixed row heights instead of SwiftUI's Table, which froze for seconds on 7,500 rows; it shows them in about 5 ms."
+    },
+    {
+      "title": "Backups you can rely on",
+      "detail": "Backups use SQLite's online backup API, so they are consistent while the app is running, and each one is integrity-checked after it is written. Encrypted backups use PBKDF2-HMAC-SHA256 and AES-256-GCM in authenticated 1 MB chunks. Restores are staged and applied before the store is opened, after a safety copy of the current data. New record types are added so that an older backup still opens: a test builds a data file from before the newest model existed, restores it over newer data, and checks both."
+    },
+    {
+      "title": "Private by construction",
+      "detail": "The app makes no network connections. Receipts are referenced by bookmark, not copied. The data is a standard SQLite file in Application Support that the owner can open with any tool."
+    },
+    {
+      "title": "Ready for iCloud sync",
+      "detail": "All 19 models follow CloudKit's rules from the start (defaults or optionals on every attribute, optional relationships, no unique constraints), with identity carried by a uuid."
+    },
+    {
+      "title": "Screenshots without real data",
+      "detail": "A built-in demo mode generates five years of an invented household from a seeded generator. The app photographs its own window screen by screen, and every picture is read back with OCR and rejected if the developer's name or home folder appears in it. The pictures on this page were made that way."
+    }
+  ],
+  "sampleData": {
+    "note": "Every screenshot shows invented sample data. No real person, account or amount appears.",
+    "household": "A two-income household over five years: a salaried job, a freelance design business (Juniper Lane Studio) with its own accounts, and a small print shop (Tidepool Prints) run through the personal accounts. Mortgage, car loan, two credit cards, savings and an index fund."
+  },
+  "roadmap": [
+    "Purchases on Schedule C: a business purchases report by line, for the accountant",
+    "Purchase rules: vendor and department defaults so new imports arrive already tagged",
+    "Card and bank follow-ups: link card payments to the checking payments that paid them, payee cleanup rules, a business review queue",
+    "Smaller purchase items: hide a whole order, attachments on any register transaction"
+  ],
+  "hero": "docs/screenshots/forecast-what-if.png",
+  "screenshots": [
+    {
+      "id": "register-checking",
+      "file": "docs/screenshots/register-checking.png",
+      "title": "Account register",
+      "caption": "A checking register with running balance, cleared and reconciled marks, flags with notes, transfers, and the transaction form underneath. A briefcase marks transactions that count toward a business.",
+      "alt": "MacMoney checking account register with a transaction selected and its details in the form below",
+      "group": "Registers",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "id": "register-credit-card",
+      "file": "docs/screenshots/register-credit-card.png",
+      "title": "Credit card register",
+      "caption": "Card charges brought in from a bank download, with payee names tidied up and Amazon charges showing the items that were bought.",
+      "alt": "Credit card register listing recent charges with categories and linked purchase items",
+      "group": "Registers",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "id": "register-auto-loan",
+      "file": "docs/screenshots/register-auto-loan.png",
+      "title": "Loan register",
+      "caption": "An auto loan paying down: each month's interest charge and the payment transferred from checking.",
+      "alt": "Auto loan register showing monthly interest and payments",
+      "group": "Registers",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "id": "balance-account",
+      "file": "docs/screenshots/balance-account.png",
+      "title": "Balance Account",
+      "caption": "Reconciling against a statement. Tick off what cleared; the difference counts down and the app beeps when it reaches zero.",
+      "alt": "Balance Account sheet with cleared transactions ticked and the remaining difference shown",
+      "group": "Registers",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "id": "bank-import",
+      "file": "docs/screenshots/bank-import.png",
+      "title": "Import bank files",
+      "caption": "Drop a folder of downloads. Each file is matched to its account, and shows how many rows are new, already in the register (matched) or already imported.",
+      "alt": "Import Bank Files sheet listing four downloads with new, matched and already imported counts",
+      "group": "Bank and card downloads",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "id": "bank-import-history",
+      "file": "docs/screenshots/bank-import-history.png",
+      "title": "Import history and undo",
+      "caption": "Every import is recorded with what it added and matched, and can be undone.",
+      "alt": "Import history listing two past imports with Undo buttons",
+      "group": "Bank and card downloads",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "id": "purchases-review",
+      "file": "docs/screenshots/purchases-review.png",
+      "title": "Purchases to review",
+      "caption": "Item-level purchases from an Amazon order export. Press B or P to mark an item business or personal.",
+      "alt": "Purchases list showing unreviewed Amazon items",
+      "group": "Purchases",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "id": "purchases-itemized",
+      "file": "docs/screenshots/purchases-itemized.png",
+      "title": "An itemized purchase",
+      "caption": "A camera bought for the business, entered by hand from the card charge: each item has a Schedule C line, a business-use percentage and a purpose.",
+      "alt": "Purchases view with three items selected and their business details in the side panel",
+      "group": "Purchases",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "id": "find-transactions",
+      "file": "docs/screenshots/find-transactions.png",
+      "title": "Find Transactions",
+      "caption": "One search across every account, open or closed, with the match count and net total.",
+      "alt": "Find Transactions results across several accounts",
+      "group": "Find and reports",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "id": "payees-overview",
+      "file": "docs/screenshots/payees-overview.png",
+      "title": "Payees overview",
+      "caption": "Where the money went: totals, a monthly average, the top payees and their share.",
+      "alt": "Payees overview with a stacked bar chart by year and a ranked list of payees",
+      "group": "Find and reports",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "id": "payees-report",
+      "file": "docs/screenshots/payees-report.png",
+      "title": "Payee report from a saved preset",
+      "caption": "Four utilities selected with one click from a saved preset: a chart over time, totals by year and every transaction, ready to export.",
+      "alt": "Payee report for four utility companies with chart and yearly totals",
+      "group": "Find and reports",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "id": "deposit-sources",
+      "file": "docs/screenshots/deposit-sources.png",
+      "title": "Deposit Sources",
+      "caption": "The same report for money coming in, here for the freelance business's clients.",
+      "alt": "Deposit Sources report for five clients with yearly totals",
+      "group": "Find and reports",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "id": "bills-and-deposits",
+      "file": "docs/screenshots/bills-and-deposits.png",
+      "title": "Bills & Deposits",
+      "caption": "Recurring bills, deposits and transfers with their next due dates. One is overdue; the car payment's schedule is open on the right.",
+      "alt": "Bills and Deposits list with one bill selected and its schedule in the inspector",
+      "group": "Planning",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "id": "forecast",
+      "file": "docs/screenshots/forecast.png",
+      "title": "Forecast",
+      "caption": "Twelve months of projected balance from today's balance, entries already made ahead of time and bills not yet entered, with no double counting.",
+      "alt": "Forecast chart of account balances over the next twelve months with the list of upcoming events",
+      "group": "Planning",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "id": "forecast-what-if",
+      "file": "docs/screenshots/forecast-what-if.png",
+      "title": "What-if scenario",
+      "caption": "A new roof laid over the baseline forecast: the purple line is the scenario, the dashed line is what would have happened, and the summary shows the difference.",
+      "alt": "Forecast chart with a what-if scenario line dipping below the dashed baseline",
+      "group": "Planning",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "id": "scenarios",
+      "file": "docs/screenshots/scenarios.png",
+      "title": "Scenario editor",
+      "caption": "A scenario is a named set of changes: stop a deposit, change a bill, add a one-time or recurring amount. Nothing in the registers changes.",
+      "alt": "Scenario editor listing three scenarios and the changes in one of them",
+      "group": "Planning",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "id": "schedule-c",
+      "file": "docs/screenshots/schedule-c.png",
+      "title": "Schedule C",
+      "caption": "A draft Schedule C for a sole-proprietor business, line by line, with the vehicle worksheet underneath and a CSV export for the accountant.",
+      "alt": "Schedule C report with income, expense lines and net profit",
+      "group": "Business and Schedule C",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "id": "profit-and-loss",
+      "file": "docs/screenshots/profit-and-loss.png",
+      "title": "Profit & Loss",
+      "caption": "Income and expenses by category for the year, with a month-by-month chart.",
+      "alt": "Profit and loss report with category totals and a monthly bar chart",
+      "group": "Business and Schedule C",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "id": "tag-transactions",
+      "file": "docs/screenshots/tag-transactions.png",
+      "title": "Tag Transactions",
+      "caption": "For business activity that runs through personal accounts: filter, select and tag transactions with a business, a tax line and a business-use percentage.",
+      "alt": "Tag Transactions table with business and tax line columns",
+      "group": "Business and Schedule C",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "id": "vehicles-and-mileage",
+      "file": "docs/screenshots/vehicles-and-mileage.png",
+      "title": "Vehicles & Mileage",
+      "caption": "A trip log per vehicle, with the standard mileage rate or actual expenses.",
+      "alt": "Vehicle mileage log listing business trips with miles and purpose",
+      "group": "Business and Schedule C",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "id": "assets",
+      "file": "docs/screenshots/assets.png",
+      "title": "Assets and depreciation",
+      "caption": "Equipment the business depreciates over several years, with each year's amount entered from the accountant's schedule. The year's total goes on Schedule C line 13.",
+      "alt": "Assets tab listing four business assets with cost, depreciation and remaining value, and one asset's yearly amounts",
+      "group": "Business and Schedule C",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "id": "tax-line-setup",
+      "file": "docs/screenshots/tax-line-setup.png",
+      "title": "Tax Line Setup",
+      "caption": "Map each category to a Schedule C line once; it applies to every year and every business.",
+      "alt": "Tax Line Setup listing categories and their Schedule C lines",
+      "group": "Business and Schedule C",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "id": "all-businesses",
+      "file": "docs/screenshots/all-businesses.png",
+      "title": "All Businesses",
+      "caption": "Gross income, expenses and net profit side by side when there is more than one business.",
+      "alt": "All Businesses summary table for two businesses",
+      "group": "Business and Schedule C",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "id": "backups",
+      "file": "docs/screenshots/backups.png",
+      "title": "Backups",
+      "caption": "Verified point-in-time backups, manual or automatic on quit, optionally encrypted.",
+      "alt": "Backups sheet listing backups with Back Up Now and Restore buttons",
+      "group": "Safety",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "id": "check-data-file",
+      "file": "docs/screenshots/check-data-file.png",
+      "title": "Check Data File",
+      "caption": "Looks for database damage and bookkeeping inconsistencies: broken transfers, splits that don't add up, duplicates.",
+      "alt": "Check Data File sheet reporting no problems found",
+      "group": "Safety",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "id": "welcome",
+      "file": "docs/screenshots/welcome.png",
+      "title": "Welcome",
+      "caption": "First launch: import a Microsoft Money file, or restore a backup when moving to a new Mac.",
+      "alt": "Welcome screen offering to import from Microsoft Money or restore from a backup",
+      "group": "Getting started",
+      "width": 1920,
+      "height": 1200
+    }
+  ]
+}

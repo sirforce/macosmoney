@@ -10,7 +10,7 @@ struct ProfitLossView: View {
     @Environment(LedgerIndex.self) private var index
     let business: Business
 
-    @State private var year = Day.year(of: Day.today)
+    @State private var year = Day.year(of: Day.today) - (DemoTour.preset("business.lastYear") == nil ? 0 : 1)
     @State private var custom = false
     @State private var from = Day.startOfYear(Day.today)
     @State private var to = Day.today
@@ -87,6 +87,9 @@ struct ProfitLossView: View {
                 months[m, default: (0, 0)].1 += -portion
             }
         }
+        // Depreciation isn't a transaction; it comes from the asset list.
+        let depreciation = Asset.all(for: business, in: context).reduce(0) { $0 + $1.depreciationCents(in: range) }
+        if depreciation != 0 { expense["Depreciation (asset list)"] = depreciation }
         var pl = PL()
         pl.income = income.map { ($0.key, $0.value) }.sorted { $0.cents > $1.cents }
         pl.expense = expense.map { ($0.key, $0.value) }.sorted { $0.cents > $1.cents }

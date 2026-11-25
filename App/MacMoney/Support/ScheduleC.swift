@@ -66,6 +66,17 @@ struct ScheduleCReport {
     let range: ClosedRange<Date>
     var lines: [TaxLine: LineTotal] = [:]
     var vehicles: [VehicleSummary] = []
+    /// Depreciation from the asset list for the tax years this report covers (line 13).
+    struct AssetLine: Identifiable {
+        let id: PersistentIdentifier
+        let name: String
+        let placedInService: Date?
+        let costCents: Int
+        let method: String
+        let cents: Int
+    }
+    var assets: [AssetLine] = []
+    var assetDepreciationCents: Int { assets.reduce(0) { $0 + $1.cents } }
     /// Business transactions whose category has no Schedule C line yet.
     var needsLine: [Item] = []
 
@@ -74,6 +85,7 @@ struct ScheduleCReport {
         switch line {
         case .carTruck: return base + vehicles.reduce(0) { $0 + $1.line9Cents }
         case .rentVehicles: return base + vehicles.reduce(0) { $0 + $1.line20aCents }
+        case .depreciation: return base + assetDepreciationCents
         default: return base
         }
     }
@@ -158,6 +170,11 @@ struct ScheduleCReport {
             lines[line]?.items.append(item(cents))
         }
         self.vehicles = vehicles.values.sorted { $0.name < $1.name }
+        assets = Asset.all(for: business, in: context).compactMap { a in
+            let cents = a.depreciationCents(in: range)
+            return cents == 0 ? nil : AssetLine(id: a.persistentModelID, name: a.name, placedInService: a.placedInService,
+                                                costCents: a.costCents, method: a.method, cents: cents)
+        }
         needsLine.sort { $0.date < $1.date }
     }
 
@@ -180,6 +197,13 @@ struct ScheduleCReport {
                 out.append(CSV.row(["", k.title, "\(Cents.decimal(c))"]))
             }
             out.append(CSV.row(["", "Line 9 amount", "\(Cents.decimal(v.line9Cents))"]))
+        }
+        if !assets.isEmpty {
+            out.append("")
+            out.append(CSV.row(["Depreciation (line 13)", "Placed in service", "Cost", "Method", "Amount"]))
+            for a in assets {
+                out.append(CSV.row([a.name, Day.string(a.placedInService), "\(Cents.decimal(a.costCents))", a.method, "\(Cents.decimal(a.cents))"]))
+            }
         }
         out.append("")
         out.append(CSV.row(["Detail: Line", "Date", "Account", "Payee", "Category", "Memo", "Business %", "Amount"]))

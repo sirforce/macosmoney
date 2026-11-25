@@ -243,6 +243,7 @@ struct PayeesView: View {
             showHidden = d.bool(forKey: "\(memoryKey).showHidden")
             if let f = d.object(forKey: "\(memoryKey).customFrom") as? Date { customFrom = f }
             if let t = d.object(forKey: "\(memoryKey).customTo") as? Date { customTo = t }
+            if let name = DemoTour.preset("payees.preset"), let p = presets.first(where: { $0.name == name }) { apply(p) }
             if let initialPayee {
                 // Every transaction for the payee, without changing the remembered period.
                 jumping = true

@@ -1,12 +1,21 @@
 # MacMoney
 
-**Version 0.10** (pre-release)
+**Version 0.11** (pre-release)
 
 A native macOS replacement for **Microsoft Money Plus Sunset Edition**. It imports your `.mny` file with its whole history and keeps the way Money works: registers, flags, bills & deposits, payee reports and forecasting. It also adds things Money never had, such as Schedule C tracking for one or more sole-proprietor businesses.
 
 Money was discontinued years ago and only runs on Windows. MacMoney lets you move to the Mac without losing twenty years of transactions. Because re-importing is safe, you can keep running both side by side until you're ready to switch.
 
 > MacMoney is an independent project. It is not affiliated with or endorsed by Microsoft. "Microsoft Money" is a trademark of Microsoft Corporation.
+
+![The forecast with a what-if scenario drawn over the baseline](docs/screenshots/forecast-what-if.png)
+
+| | |
+|---|---|
+| ![Checking register](docs/screenshots/register-checking.png) | ![Importing bank files](docs/screenshots/bank-import.png) |
+| ![Schedule C for a home business](docs/screenshots/schedule-c.png) | ![Payee report](docs/screenshots/payees-report.png) |
+
+Every picture shows invented sample data. [More screenshots](docs/project-page/README.md#screenshots)
 
 ## Features
 
@@ -21,8 +30,8 @@ Money was discontinued years ago and only runs on Windows. MacMoney lets you mov
 | **Payees & Deposit Sources** | Every payee, or only the people and companies who pay you, with use counts, this year's and all-time totals. Select one or many for a trend chart, totals by year and category, every transaction, and CSV export. Back and forward buttons move between what you've looked at. **Saved presets** recall a selection and its filters with one click. |
 | **Bills & Deposits** | Recurring items (weekly, twice a month, monthly, yearly and more) that keep their day of the month. Sort, edit the next due date and frequency, enter or skip occurrences, or pre-load everything due into the right register. Optionally flag entries as "auto-pay scheduled". |
 | **Forecast** | Today's balance, plus entries you've already entered ahead of time, plus bills and deposits not yet entered, without double counting. Choose 3–36 months or a custom date range. **What-if scenarios** (one-time or recurring amounts, changed or stopped bills) are drawn over the baseline with the difference shown. Hover the chart to see what moves the balance each day; click to highlight those transactions; double-click to open one. |
-| **Business / Schedule C** | One or more businesses. Link whole accounts, or tag individual transactions in a personal account where business and personal are mixed. Map categories to Schedule C lines. Supports business-use %, 50% meals and vehicles (standard mileage or actual expenses with a trip log). Produces a Schedule C and a profit & loss report per business or for all of them, with CSV for your accountant. |
-| **Backup & restore** | Verified point-in-time backups: manual, automatic when the app quits (each time, daily, weekly or monthly), keep the last *N*, optionally **AES-256 encrypted** and optionally in iCloud Drive. A safety backup is taken before every import and every restore. **Check Data File** looks for database damage and bookkeeping inconsistencies. |
+| **Business / Schedule C** | One or more businesses. Link whole accounts, or tag individual transactions in a personal account where business and personal are mixed. Map categories to Schedule C lines. Supports business-use %, 50% meals and vehicles (standard mileage or actual expenses with a trip log). An asset list holds equipment and each year's depreciation from your accountant's schedule (line 13). Produces a Schedule C and a profit & loss report per business or for all of them, with CSV for your accountant. |
+| **Backup & restore** | Verified point-in-time backups: manual, automatic when the app quits (each time, daily, weekly or monthly), keep the last *N*, optionally **AES-256 encrypted** and optionally in iCloud Drive. Backups from older versions restore into newer ones. A safety backup is taken before every import and every restore. **Check Data File** looks for database damage and bookkeeping inconsistencies. |
 
 See the **[User Guide](docs/user-guide.md)** for a full walkthrough.
 
@@ -47,6 +56,16 @@ Or open `App/MacMoney.xcodeproj` in Xcode and press Run. The first build downloa
 Use the **Release** configuration for day-to-day use; it's much faster with large registers.
 
 To produce a signed, notarized app and DMG and install it in `/Applications`, use `tools/release/release.sh`. See **[Releasing](docs/releasing.md)**.
+
+## Try it with sample data
+
+No Money file? Start the app with `--demo` to explore an invented household with five years of history: paychecks, a mortgage, a car loan, credit cards, a freelance business and its Schedule C.
+
+```sh
+open build/DD/Build/Products/Release/MacMoney.app --args --demo
+```
+
+The sample data lives in its own folder and never touches your real data. See **[Sample Data & Screenshots](docs/demo-and-screenshots.md)**.
 
 ## Getting your data in
 
@@ -76,6 +95,8 @@ Nothing is sent anywhere. The app makes no network connections. The only downloa
 - [Architecture](docs/architecture.md): code layout, data model, performance design
 - [Money File Format Notes](docs/money-file-format.md): what we learned about Money's internal schema
 - [Releasing](docs/releasing.md): signing, notarizing, the DMG and the app icon
+- [Sample Data, Screenshots and the Project Page](docs/demo-and-screenshots.md): demo mode, how the pictures are made, and what to update when a feature ships
+- [Project page details](docs/project-page/README.md): features, technical highlights and every screenshot in one place
 - [Contributing](CONTRIBUTING.md)
 
 ## Project layout
@@ -84,12 +105,14 @@ Nothing is sent anywhere. The app makes no network connections. The only downloa
 App/                      SwiftUI + SwiftData macOS app (XcodeGen project in project.yml)
   MacMoney/Models/        Data model (accounts, entries, bills, businesses, presets…)
   MacMoney/Import/        Runs the converter and merges its JSON into the store
+  MacMoney/Demo/          Sample data (--demo) and the screenshot tour
   MacMoney/Support/       Ledger index, forecast, Schedule C, backups, date and money helpers
   MacMoney/Views/         Screens; FastTable.swift is the NSTableView-backed list used everywhere
   MacMoneyTests/          Unit tests (import tests use your own export and skip without one)
 tools/mny-export/         Read-only Java converter: .mny → JSON (Jackcess)
 tools/icon/               The app icon, drawn in code, and the script that renders every size
 tools/release/            Release script: sign, notarize, DMG, install
+tools/demo/               Screenshot script and the check that keeps personal details out of pictures
 docs/                     Documentation
 ```
 

@@ -62,7 +62,8 @@ enum Backup {
     // MARK: Locations & settings
 
     static var dataFolder: URL {
-        URL.applicationSupportDirectory.appendingPathComponent("MacMoney", isDirectory: true)
+        if DemoMode.isOn { return DemoMode.dataFolder }
+        return URL.applicationSupportDirectory.appendingPathComponent("MacMoney", isDirectory: true)
     }
     static var storeURL: URL { dataFolder.appendingPathComponent("MacMoney.store") }
     static var defaultFolder: URL { dataFolder.appendingPathComponent("Backups", isDirectory: true) }
@@ -98,6 +99,8 @@ enum Backup {
 
     static var folder: URL {
         get {
+            // The demo keeps its backups with its own data, never in your real backup folder.
+            if DemoMode.isOn { return defaultFolder }
             if let p = UserDefaults.standard.string(forKey: Key.folder), !p.isEmpty { return URL(fileURLWithPath: p, isDirectory: true) }
             return defaultFolder
         }
@@ -201,6 +204,7 @@ enum Backup {
     /// The quit-time hook: backs up if automatic backups are on and one is due.
     static func makeAutomaticIfDue(now: Date = Date()) {
         let d = UserDefaults.standard
+        guard !DemoMode.isOn else { return }
         guard d.bool(forKey: Key.auto), FileManager.default.fileExists(atPath: storeURL.path) else { return }
         if let last = d.object(forKey: Key.last) as? Date, now.timeIntervalSince(last) < frequency.interval { return }
         do {
